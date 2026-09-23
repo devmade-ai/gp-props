@@ -2,7 +2,7 @@
 
 How to maintain the mirrored project docs on the gp-props portfolio site.
 
-**Last mirrored:** 2026-08-03
+**Last mirrored:** 2026-09-23
 
 ## Current Status
 
@@ -25,6 +25,7 @@ How to maintain the mirrored project docs on the gp-props portfolio site.
 | qi-invoice | private | Scrubbed | Yes | Scrubbed | **No** | README: removed setup commands, env vars, internal doc links; kept the design-decision notes, which are the interesting part at portfolio altitude. User Guide copied as-is (grepped first — it contains no commands, paths or env vars). Testing Guide: removed the automated-suite section, npm scripts and file paths, keeping the 16 manual scenarios. No TutorialModal in source. |
 | kl-website | private | Scrubbed | **No** | **No** | **No** | Mirrored without being recorded here — added 2026-08-03. Only a README is present; user guide, testing guide and tutorial were never mirrored. |
 | web-arch | private | Scrubbed | Yes | Yes | **No** | Branded "redline", a knowless sub-brand. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
+| bl-borderline | private | Scrubbed | Yes | Scrubbed | Yes | Added 2026-09-23. README: removed Getting Started (commands) and the internal data-doc link. User Guide copied as-is (no commands, paths or env vars). Testing Guide: removed local setup, server commands, npm checks, the automated-checks section and the alpha debug-pill scenario. Tutorial from `src/components/TutorialModal.jsx`. |
 | dm-website | private | Scrubbed | Yes | Yes | **No** | The devmade studio front-door site. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
 
 ### Internal Tools
@@ -262,4 +263,4 @@ All URLs must end with a trailing slash (`/`).
 
 ## Private Repos
 
-Currently private: graphiki, fh-fuelhunt, intxt, tool-till-tees, sun-sea-o, four-ems, qi-invoice
+Currently private: graphiki, fh-fuelhunt, intxt, tool-till-tees, sun-sea-o, four-ems, qi-invoice, bl-borderline
