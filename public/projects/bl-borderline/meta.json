@@ -1,0 +1,36 @@
+{
+  "name": "bl-borderline",
+  "title": "Borderline",
+  "description": "A game that tests what you know about the countries of the world: pick a part of the world and what to name, then fill in every answer you know.",
+  "category": "user-facing",
+  "badge": "Game",
+  "status": "active",
+  "repo": "private",
+  "liveUrl": "https://bl-borderline.vercel.app/",
+  "tech": [
+    "JavaScript",
+    "React",
+    "Vite",
+    "Tailwind CSS",
+    "PWA"
+  ],
+  "audience": "Anyone who wants to test what they know about the world's countries, on a phone or a computer, without an account.",
+  "useCases": [
+    "Someone with ten minutes on a train picks Southern Africa and names every country from its flag, offline, because the app is installed",
+    "A geography fan takes on the whole world with capitals ticked and chips away at all 250 places over a few days; the game is saved on the device between sessions",
+    "A traveller about to visit South-Eastern Asia picks that subregion and tests themselves on currencies and dialing codes before the trip",
+    "A student revising for a test picks Europe with capitals and languages, types what they know, and uses the score to see how much is left to learn"
+  ],
+  "dataPrivacy": {
+    "storage": "The game in progress and the app's settings are kept in the browser's local storage, on the device only.",
+    "authentication": "None. There are no accounts.",
+    "transmission": "Nothing a player types is sent anywhere. Once loaded, the app works with the network switched off.",
+    "thirdParty": "None at runtime. Country data from mledoze/countries (ODbL 1.0) and flag images from flag-icons (MIT) are built into the app."
+  },
+  "docs": {
+    "readme": true,
+    "userGuide": true,
+    "testingGuide": true,
+    "tutorial": true
+  }
+}

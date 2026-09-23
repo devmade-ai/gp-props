@@ -111,6 +111,14 @@ export const PROJECTS = [
     tech: 'TypeScript · React · Cloudflare',
     live: 'https://www.devmade.app/',
   },
+  {
+    slug: 'bl-borderline',
+    title: 'Borderline',
+    badges: [{ label: 'Game', primary: true }, { label: 'On-device' }],
+    description: 'Countries-of-the-world game. Pick a region and what to name (flags, capitals, currencies, dialing codes and more), then fill in every answer you know. Works offline.',
+    tech: 'JavaScript · React · Vite · PWA',
+    live: 'https://bl-borderline.vercel.app/',
+  },
 ];
 
 export const TOOLS = [
