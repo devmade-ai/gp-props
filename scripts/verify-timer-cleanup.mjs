@@ -143,9 +143,14 @@ for (const file of listJsFiles(join(ROOT, 'src'))) {
 }
 
 // Every static-asset script, not just theme.js — a future public/analytics.js
-// with listeners must not slip past unchecked.
+// with listeners must not slip past unchecked. A service-worker script is the
+// exception here exactly as it is under src/: a push handler importScripts'd
+// into the generated worker (fc-fanfare-chess and bl-borderline
+// public/push-sw.js) lives and dies with the worker, has no `window`, and
+// has nothing that could call a dispose().
 for (const file of listJsFiles(join(ROOT, 'public'))) {
   const content = readUtf8(file);
+  if (IS_SERVICE_WORKER.test(content)) continue;
   if (REGISTRATION.test(content) && !GLOBAL_DISPOSE.test(content)) {
     failures.push(`${file}: registers listeners/timers but does not expose a window.__<name> object with dispose()`);
   }
