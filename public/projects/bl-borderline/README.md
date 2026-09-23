@@ -6,15 +6,16 @@ of the world and what to name, then fill in every answer you know.
 ## Features
 - **Name them all.** Choose the whole world, one of 6 regions or one of 25
   subregions, and any mix of seven topics: country names (from their flags),
-  capitals, internet domains, dialing codes, currencies, languages, and what
-  the people are called. Every country or territory in the area gets a row
-  with a box per topic, and each box turns green the moment it's right.
+  capitals, internet domains, dialing codes, currencies, how many official
+  languages, and what the people are called. Every country or territory in
+  the area gets a row with a box per topic.
+- **Score only.** Nothing is marked while playing. "Submit" ends the game and
+  shows how many answers were right, never which ones.
 - **Forgiving typing, strict geography.** Capitals, accents and punctuation
   don't matter, and alternative names from the data are accepted
   ("Ivory Coast"). Near misses ("Nigeria" for Niger) are not.
 - **No clock, no lost games.** The game in progress is saved on the device, so
-  leaving and coming back picks up where it stopped. "Give up" ends it with the
-  score.
+  leaving and coming back picks up where it stopped, typed answers included.
 - **Installable app.** Add it to a phone's home screen or a computer's dock
   from the menu's "Install app". Step-by-step instructions appear for browsers
   that can't install with one tap.
