@@ -57,25 +57,22 @@ async function assertMaskableSafeZone(file, background) {
     parseInt(background.slice(3, 5), 16),
     parseInt(background.slice(5, 7), 16),
   ];
-  let minX = Infinity, minY = Infinity, maxX = -1, maxY = -1;
+  // The farthest INK PIXEL from centre, not the corners of the ink's bounding
+  // box: a round mark's box corners sit up to √2 further out than any of its
+  // ink, so a box test rejects marks safely inside the circle
+  // (APP_ICONS.md). Even this 2×2 grid gains from it: its rounded outer
+  // corners measure 37.9% per pixel against 39.4% by the box (2026-09-23).
+  const cx = info.width / 2;
+  const cy = info.height / 2;
+  let radius = -1;
   for (let y = 0; y < info.height; y += 1) {
     for (let x = 0; x < info.width; x += 1) {
       const i = (y * info.width + x) * info.channels;
       const delta = Math.abs(data[i] - bg[0]) + Math.abs(data[i + 1] - bg[1]) + Math.abs(data[i + 2] - bg[2]);
-      if (delta > 24) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
+      if (delta > 24) radius = Math.max(radius, Math.hypot(x + 0.5 - cx, y + 0.5 - cy));
     }
   }
-  if (maxX < 0) throw new Error(`[generate-icons] ${file} is blank — no mark rendered.`);
-  const cx = info.width / 2;
-  const cy = info.height / 2;
-  const radius = Math.max(
-    ...[[minX, minY], [maxX, minY], [minX, maxY], [maxX, maxY]].map(([x, y]) => Math.hypot(x - cx, y - cy)),
-  );
+  if (radius < 0) throw new Error(`[generate-icons] ${file} is blank — no mark rendered.`);
   const fraction = radius / info.width;
   if (fraction > MASKABLE_SAFE_RADIUS) {
     throw new Error(
@@ -84,7 +81,7 @@ async function assertMaskableSafeZone(file, background) {
         'Android will crop it — lower MASKABLE_MARK until this passes.',
     );
   }
-  console.log(`  maskable safe zone ok — mark at ${(fraction * 100).toFixed(1)}% of 40%`);
+  console.log(`  maskable safe zone ok — farthest ink at ${(fraction * 100).toFixed(1)}% of 40%`);
 }
 
 async function generate() {
