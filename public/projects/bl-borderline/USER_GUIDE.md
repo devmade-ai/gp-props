@@ -9,18 +9,18 @@ part of the world and what to name, then fill in every answer you know.
    Americas, Antarctic, Asia, Europe and Oceania. For a smaller game, choose a
    part of that region too, such as Southern Africa.
 2. Under **What to name**, tick one or more topics: country names (from their
-   flags), capitals, internet domains, dialing codes, currencies, languages,
-   and what the people are called. The line above **Start** says how many
+   flags), capitals, internet domains, dialing codes, currencies, how many
+   official languages, and what the people are called. The line above **Start** says how many
    places and answers the game will have.
 3. Tap **Start**. Each country or territory gets a card, with a box for each
    topic. When you're naming countries, the card shows only the flag;
    otherwise it shows the flag and the name.
-4. Type into a box. As soon as your answer is right, the box turns green and
-   the next empty box is selected, so you can keep typing. A wrong answer
-   stays in its box; nothing tells you it's wrong, so you can fix it or move
-   on.
+4. Type the answers you know. **Enter** (or **Next** on a phone keyboard)
+   moves to the next box. Nothing is marked while you play: no box shows
+   whether it's right, so change any answer as often as you like. The bar at
+   the top counts how many boxes you've filled.
 
-What counts as right:
+What counts as right when you submit:
 - Capital letters, accents and punctuation don't matter: "st lucia" finds
   Saint Lucia.
 - Other names for a country count too: "Côte d'Ivoire", or "cote divoire",
@@ -29,7 +29,8 @@ What counts as right:
 - For a currency, the name ("South African rand"), the short name ("rand") or
   the code ("ZAR") all count.
 - For a dialing code, the "+" is optional.
-- For a language, any official language of that country counts.
+- For official languages, type how many the country has, as a number ("3")
+  or a word ("three"). It has to be the exact number.
 
 Every country and territory in the area is included, even small ones. If the
 data has no answer for something (Antarctica has no capital), that box isn't
@@ -37,8 +38,9 @@ shown and doesn't count.
 
 ## Leave and come back
 
-Your game is saved on your device as you play. Go back to the start screen,
-close the app, or turn off your phone: it will still be there.
+Your game is saved on your device as you type, answers included. Go back to
+the start screen, close the app, or turn off your phone: it will still be
+there.
 
 - On the start screen, **Continue** takes you back to it.
 - On a phone, **Game** in the bottom bar does the same.
@@ -46,10 +48,10 @@ close the app, or turn off your phone: it will still be there.
 
 ## Finish
 
-The game ends when every box is green, or when you tap **Give up** at the
-bottom of the list and confirm. You then see your score, for example "You found
-12 of 34." The answers you missed are not shown. **New game** takes you back to
-the start screen.
+Tap **Submit** in the bar at the top and confirm. The game ends and you see
+your score, for example "You got 12 of 34 right." It doesn't show which answers
+were right or wrong, and the answers can't be changed after that. **New game**
+takes you back to the start screen.
 
 ## Open the menu
 

@@ -75,24 +75,30 @@ unless a scenario says otherwise.
 ### 8. Playing
 1. Southern Africa with country names and capitals → **Start**. The URL is
    `/play`; there are 5 cards showing flags only, no names; the bar at the top
-   shows "Southern Africa", "Country, Capital" and "0 / 10".
-2. Type a wrong name in a Country box: nothing happens.
-3. Type the right name in capitals (e.g. NAMIBIA): the box turns green with a
-   ✓, the score reads 1 / 10, and the cursor jumps to the next empty box.
-4. Type that country's capital without accents or capitals: accepted, 2 / 10.
-5. Reload: still 2 / 10. Press Back: the start screen shows **Continue**, and
-   the nav shows **Game**. **Continue** returns to the same game.
-6. **Give up** → a dialog says "You've found 2 of 10…", with **Keep playing**
-   focused. Back closes the dialog and the game stays. **Give up** →
-   **Give up**: "You found 2 of 10." appears, every remaining box is greyed
-   out and empty (no answers revealed).
-7. **New game** → Oceania → Australia and New Zealand → **Start**; name all 5.
-   "You found all 5!" appears.
+   shows "Southern Africa", "Country, Capital", "0 / 10 filled" and
+   **Submit**.
+2. Type a wrong name in one Country box and the right name in capitals (e.g.
+   NAMIBIA) in another: neither box changes colour, and the bar reads
+   "2 / 10 filled". **Enter** moves the cursor to the next box.
+3. Type that country's capital without accents or capitals: "3 / 10 filled".
+4. Reload: the three answers are still in their boxes. Press Back: the start
+   screen shows **Continue**, and the nav shows **Game**. **Continue**
+   returns to the same game with the same answers.
+5. **Submit** → a dialog says "You've filled 3 of 10 boxes…", with **Keep
+   playing** focused. Back closes the dialog and the game stays. **Submit** →
+   **Submit**: "You got 2 of 10 right." appears and the cards are gone (no
+   answers, no right/wrong marks).
+6. **New game** → Southern Africa, tick **How many official languages** →
+   **Start**. The official-languages box opens a number keyboard on a phone.
+   For South Africa's flag, type the name and "eleven"; submit: 2 right.
+   Typing "10" instead scores it wrong.
+7. **New game** → Oceania → Australia and New Zealand → **Start**; name all 5
+   and submit: "You got all 5 right!" appears.
 8. Start a game, go Back, press **Start** again: a dialog names the game in
    progress. **Start new game** opens the new one; Back from it lands on the
    start screen, not on the dialog.
-9. The whole world with all seven topics appears in about 0.2 s (1,737
-   boxes) and an answer registers instantly. Scrolling down, every flag loads;
+9. The whole world with all seven topics appears in about 0.3 s (1,737
+   boxes) and typing keeps up with the keyboard. Scrolling down, every flag loads;
    all 250 are images, never emoji, and each flag's description says "Flag
    number N", never the country.
 10. With the game open once online, go offline, reload and scroll the whole
