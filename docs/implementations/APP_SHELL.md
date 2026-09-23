@@ -366,7 +366,13 @@ scrimmed overlays and modals each take and release a count, and the body
 style changes only on 0→1 and 1→0. Two components writing
 `document.body.style.overflow` directly is a known race
 (BURGER_MENU.md Key Lesson 5); nothing outside the store touches history or
-body styles.
+body styles. The store also owns **inertness**: derive an `overlayCount` from
+its overlay registry and mark the shell `inert` while it is above zero. Per-
+surface flags (`menuOpen || chatOpen || …`) miss every modal rendered outside
+the shell; fc-fanfare-chess left the page reachable behind its portaled
+confirm, promotion and install dialogs that way until 2026-09-23.
+bl-borderline and fc-fanfare-chess `src/lib/layoutStore.js` are the
+reference.
 
 ## Stacking
 

@@ -226,7 +226,8 @@ The pill's corner is bottom-left, and in an [APP_SHELL.md](APP_SHELL.md) app
 that is exactly where the bottom nav puts the menu button. At `bottom: 12px`
 and z-80 the pill covers the trigger and swallows every tap on it. This was
 found in bl-borderline on 2026-09-23 by a browser test that could not open the
-menu. fc-fanfare-chess carries the same overlap in dev. Lift the pill above the
+menu. fc-fanfare-chess had the same overlap in dev (fixed the same day). Lift
+the pill above the
 nav band, with fallbacks so it still places itself when the app stylesheet
 failed to load:
 
