@@ -183,7 +183,12 @@ two publishers: the design system authors it, the app consumes it.
 A new app copies this once, before any design exists, and builds every
 component against it. It is deliberately plain — near-neutral warm greys,
 one restrained blue accent — so nothing about it survives the design pass
-except the names:
+except the names. Plain is not a licence to fail contrast, though: the
+starter ships before the design and a real app runs on it until then.
+`--text-faint` was `#9c9ca3` (2.6:1 on the page) and `--border-strong`
+`#c9c9c2` (1.6:1) until 2026-09-23, when bl-borderline adopted the set and
+measured them; the values below are the measured fix, the same one
+fc-fanfare-chess made in its own design values:
 
 ```css
 :root {
@@ -195,17 +200,20 @@ except the names:
   --surface-raised: #f4f4f1;
   --surface-sunken: #efefec;
 
-  /* Text */
+  /* Text — every step clears WCAG AA (4.5:1) on every surface above, so no
+     ink here is too light to use for text. Hairlines use the border tokens. */
   --text-strong:    #1a1a1c;
   --text-body:      #333336;
-  --text-muted:     #6e6e74;
-  --text-faint:     #9c9ca3;
+  --text-muted:     #5e5e65;
+  --text-faint:     #6b6b72;
   --text-on-accent: #ffffff;
 
-  /* Borders */
+  /* Borders. --border-strong clears 3:1 on every surface because it is the
+     only thing marking an input's edge (WCAG 1.4.11). Hairlines are
+     decorative dividers and sit deliberately below that. */
   --border-hairline: #e6e6e1;
   --border-soft:     #efefec;
-  --border-strong:   #c9c9c2;
+  --border-strong:   #86867f;
 
   /* Accent */
   --accent:       #3556c7;

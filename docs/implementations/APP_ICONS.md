@@ -130,29 +130,25 @@ async function assertMaskableSafeZone(file, background) {
     .toBuffer({ resolveWithObject: true });
   const bg = [1, 3, 5].map((i) => parseInt(background.slice(i, i + 2), 16));
 
-  // Bounding box of every pixel that differs from the plate colour. The
-  // threshold ignores the anti-aliased fade at the mark's own edge without
-  // ignoring the mark.
-  let minX = Infinity, minY = Infinity, maxX = -1, maxY = -1;
+  // The farthest INK PIXEL from centre, measured per pixel. The threshold
+  // ignores the anti-aliased fade at the mark's own edge without ignoring the
+  // mark. Not the corners of the ink's bounding box: for a round mark those
+  // corners sit up to √2 further out than any ink (a ring at 31.7% measured
+  // 44.7% by its box in bl-borderline, 2026-09-23), so a box test rejects
+  // marks that are safely inside the circle. Only a sharp-cornered square
+  // mark measures the same both ways.
+  const cx = info.width / 2, cy = info.height / 2;
+  let radius = -1;
   for (let y = 0; y < info.height; y += 1) {
     for (let x = 0; x < info.width; x += 1) {
       const i = (y * info.width + x) * info.channels;
       const delta = Math.abs(data[i] - bg[0])
         + Math.abs(data[i + 1] - bg[1]) + Math.abs(data[i + 2] - bg[2]);
-      if (delta > 24) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
+      if (delta > 24) radius = Math.max(radius, Math.hypot(x + 0.5 - cx, y + 0.5 - cy));
     }
   }
-  if (maxX < 0) throw new Error(`${file} is blank — no mark rendered.`);
+  if (radius < 0) throw new Error(`${file} is blank — no mark rendered.`);
 
-  // The CORNERS of the ink box are what the circular mask clips, not its edges.
-  const cx = info.width / 2, cy = info.height / 2;
-  const radius = Math.max(...[[minX, minY], [maxX, minY], [minX, maxY], [maxX, maxY]]
-    .map(([x, y]) => Math.hypot(x - cx, y - cy)));
   const fraction = radius / info.width;
 
   if (fraction > MASKABLE_SAFE_RADIUS) {
@@ -162,7 +158,7 @@ async function assertMaskableSafeZone(file, background) {
       'Android will crop it — lower the mark size until this passes.',
     );
   }
-  console.log(`  maskable safe zone ok — mark at ${(fraction * 100).toFixed(1)}% of 40%`);
+  console.log(`  maskable safe zone ok — farthest ink at ${(fraction * 100).toFixed(1)}% of 40%`);
 }
 ```
 

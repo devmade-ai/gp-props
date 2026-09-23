@@ -220,6 +220,24 @@ Renders in a separate React root (`#debug-root` in `index.html`). Uses **inline 
 - App CSS isn't guaranteed to be loaded when the pill renders
 - Avoids dependency on any specific CSS framework
 
+### Placement: clear the shell's menu trigger
+
+The pill's corner is bottom-left, and in an [APP_SHELL.md](APP_SHELL.md) app
+that is exactly where the bottom nav puts the menu button. At `bottom: 12px`
+and z-80 the pill covers the trigger and swallows every tap on it. This was
+found in bl-borderline on 2026-09-23 by a browser test that could not open the
+menu. fc-fanfare-chess carries the same overlap in dev. Lift the pill above the
+nav band, with fallbacks so it still places itself when the app stylesheet
+failed to load:
+
+```typescript
+const PILL_BOTTOM = 'calc(var(--nav-height, 0px) + var(--safe-bottom, 0px) + 12px)'
+// pill and panel: { position: 'fixed', bottom: PILL_BOTTOM, left: '12px', zIndex: 80, … }
+```
+
+On desktop the shell folds `--nav-height` to `0px`, so the pill returns to the
+corner. Apps without a bottom nav (gp-props) are unaffected.
+
 ### Hydration-Safe Initialization
 
 When using SSR or React Native Web, initialize state empty and sync in `useEffect` to prevent hydration mismatch (React error #418):
