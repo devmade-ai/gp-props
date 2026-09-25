@@ -33,6 +33,7 @@ Also hosts `CLAUDE.md` — a comprehensive AI assistant ruleset used as a refere
 | [redline](https://web-arch.vercel.app) | Archived-page diff viewer (knowless) | JS, React, Wayback |
 | [devmade](https://www.devmade.app) | devmade studio front-door | TS, React, Cloudflare |
 | [Borderline](https://bl-borderline.vercel.app/) | Countries-of-the-world "name them all" game | JS, React, Vite, PWA |
+| [Pixel Art](https://px-pixelart.vercel.app/) | Very basic pixel-picture maker | JS, React, Vite, PWA |
 
 ### Internal Tools
 
