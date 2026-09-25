@@ -2,17 +2,20 @@
 
 Manual scenarios with exact actions and expected results. Every scenario below
 except 13 and the one-tap install in 20 was run in a browser at phone,
-landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 21 and 22
-on 2026-09-26). Scenarios 13 and 20's one-tap install need a real phone and
-have not been run yet. A phone-sized window unless a scenario says otherwise.
+landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 21 and
+22, and the preset sizes and empty boxes in 1–3, on 2026-09-26). Scenarios 13
+and 20's one-tap install need a real phone and have not been run yet. A
+phone-sized window unless a scenario says otherwise.
 
 ## Scenarios
 
 ### 1. First load
 1. Open the app.
 - The header shows the Pixel Art mark (a white pixel heart) and name. The New
-  screen shows **New picture** with **Rows** 16, **Columns** 16 and
-  **Create grid**.
+  screen shows **New picture** with four buttons, **8 × 8**, **16 × 16**,
+  **32 × 32** and **64 × 64**, then **Custom size** with **Rows** and
+  **Columns** boxes that are EMPTY (grey example text "e.g. 12" and "e.g. 20",
+  no value), "1 to 64" under each, and **Create grid**.
 - The bottom nav shows the menu button (left), **New** (highlighted),
   **Saved**, and an empty slot on the right. There is no **Draw** yet.
 - A "Ready for offline use." toast appears once the service worker installs.
@@ -24,10 +27,14 @@ have not been run yet. A phone-sized window unless a scenario says otherwise.
   from 1 to 64." Focus moves to Rows. Nothing is created; the page stays on New.
 2. Type `abc` or `1.5` in either box and tap **Create grid**.
 - The box says to type a number from 1 to 64.
-3. Change a box. Its message disappears.
+3. Clear both boxes and tap **Create grid**.
+- Both boxes say to type a number from 1 to 64; nothing is created.
+4. Change a box. Its message disappears.
 
 ### 3. Create a grid
-1. Type 8 and 12, tap **Create grid**.
+1. Tap **16 × 16**. The Draw screen opens with a 16 × 16 white grid, no
+   question asked (nothing was open). Go back to **New**.
+2. Type 8 and 12, tap **Create grid**.
 - The Draw screen opens: "Unsaved picture", "8 × 12 · Not saved yet",
   **Save** and **Save as new** under it, and a white grid of 96 squares that
   fits the screen width. **Draw** appears in the bottom nav, highlighted.
@@ -129,7 +136,8 @@ button.
   After deleting, Saved shows "No saved pictures yet." with **New picture**.
   Draw still shows it with its name, status "Not saved yet", and **Save**
   asks for a name again, suggesting the old one.
-6. On New, with changes that aren't saved, tap **Create grid**.
+6. On New, with changes that aren't saved, tap **16 × 16** (a custom size
+   with **Create grid** asks the same way).
 - "Start a new picture?" **Keep drawing it** stays; **Start new picture**
   opens the new blank grid. A blank or saved picture is replaced without
   asking.

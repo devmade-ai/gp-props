@@ -4,7 +4,7 @@ In-app walkthrough. Access anytime via the menu ("How it works").
 
 ## Step 1: Choose a size
 
-On the New screen, type how many rows and columns you want, from 1 to 64 each, then tap “Create grid”. Every square starts white, or black in dark mode.
+On the New screen, tap a ready-made size like 16 × 16, or type how many rows and columns you want, from 1 to 64 each, and tap “Create grid”. Every square starts white, or black in dark mode.
 
 ## Step 2: Colour a square
 

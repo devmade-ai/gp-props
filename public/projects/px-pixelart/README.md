@@ -3,7 +3,8 @@
 Make pixel pictures: choose how many rows and columns, then colour the squares.
 
 ## Features
-- **Any grid size.** From 1 to 64 rows and 1 to 64 columns. Every square
+- **Any grid size.** One tap for 8 × 8, 16 × 16, 32 × 32 or 64 × 64, or type
+  any size from 1 to 64 rows and 1 to 64 columns. Every square
   starts white, or black when the app is in dark mode.
 - **Insert rows and columns.** From a square's colour window, insert a blank
   row above or below it, or a column to its left or right, up to 64 each.

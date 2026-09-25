@@ -5,14 +5,17 @@ squares you want, then colour the squares.
 
 ## Start a picture
 
-1. On the **New** screen, type how many **Rows** and **Columns** you want.
-   Each can be from 1 to 64. Both start at 16.
-2. Tap **Create grid**. The picture opens on the **Draw** screen, with every
+1. On the **New** screen, tap one of the ready-made sizes: **8 × 8**,
+   **16 × 16**, **32 × 32** or **64 × 64**. The picture opens straight away.
+2. For any other size, go to **Custom size** and type how many **Rows** and
+   **Columns** you want, from 1 to 64 each. The boxes start empty; the grey
+   example text in them is only a hint.
+3. Tap **Create grid**. The picture opens on the **Draw** screen, with every
    square white, or black if the app is in dark mode. The squares keep that
    colour if you switch modes later.
 
-If a number is outside 1 to 64, or isn't a number, the box says so and nothing
-is created.
+If a box is empty, or its number is outside 1 to 64 or isn't a number, the box
+says so and nothing is created.
 
 If the picture you were drawing has changes that aren't saved, the app asks
 before starting a new one: **Start new picture** throws those changes away,
