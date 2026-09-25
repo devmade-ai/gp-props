@@ -1,0 +1,36 @@
+{
+  "name": "px-pixelart",
+  "title": "Pixel Art",
+  "description": "A very basic pixel-picture maker: choose how many rows and columns, then colour the squares.",
+  "category": "user-facing",
+  "badge": "Design",
+  "status": "active",
+  "repo": "private",
+  "liveUrl": "https://px-pixelart.vercel.app/",
+  "tech": [
+    "JavaScript",
+    "React",
+    "Vite",
+    "Tailwind CSS",
+    "PWA"
+  ],
+  "audience": "Anyone who wants to make a small pixel picture on a phone or a computer, without an account or a drawing program.",
+  "useCases": [
+    "A child picks a 16 × 16 grid on a parent's phone, colours a pixel heart square by square, and saves it to show later",
+    "Someone planning a cross-stitch or bead pattern sets the exact rows and columns, fills the background in one go with \"Pick all\", and keeps several versions with Save as new",
+    "A designer copies a brand colour code from another app and pastes it into the colour window to use the exact shade",
+    "A teacher sketches a simple pixel icon for a lesson on a laptop, saves it, and opens it again the next day to finish it, offline"
+  ],
+  "dataPrivacy": {
+    "storage": "The picture being drawn and every saved picture are kept in the browser's local storage, on the device only.",
+    "authentication": "None. There are no accounts.",
+    "transmission": "Nothing is sent anywhere. Once loaded, the app works with the network switched off.",
+    "thirdParty": "None at runtime. The clipboard is read only when Paste is tapped, and only with the browser's permission."
+  },
+  "docs": {
+    "readme": true,
+    "userGuide": true,
+    "testingGuide": true,
+    "tutorial": true
+  }
+}

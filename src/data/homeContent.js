@@ -119,6 +119,14 @@ export const PROJECTS = [
     tech: 'JavaScript · React · Vite · PWA',
     live: 'https://bl-borderline.vercel.app/',
   },
+  {
+    slug: 'px-pixelart',
+    title: 'Pixel Art',
+    badges: [{ label: 'Design', primary: true }, { label: 'On-device' }],
+    description: 'A very basic pixel-picture maker. Choose the rows and columns, then colour squares one at a time or many at once, with copy and paste for colour codes. Save, save as new, and open saved pictures again. Works offline.',
+    tech: 'JavaScript · React · Vite · PWA',
+    live: 'https://px-pixelart.vercel.app/',
+  },
 ];
 
 export const TOOLS = [

@@ -280,7 +280,16 @@ export function useFocusTrap(containerRef, active) {
     document.addEventListener('keydown', handleKeyDown)
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
-      previousFocusRef.current?.focus()
+      // Next frame, not now: under APP_SHELL a page-owned modal unmounts
+      // while the shell behind it is still inert (the attribute drops on the
+      // following render), and focus() into an inert subtree silently fails,
+      // leaving focus on <body> (px-pixelart, 2026-09-25). A one-shot frame
+      // after unmount has nothing left to cancel it; the isConnected check
+      // covers a trigger that unmounted meanwhile.
+      const previous = previousFocusRef.current
+      requestAnimationFrame(() => {
+        if (previous?.isConnected) previous.focus()
+      })
     }
   }, [active, containerRef])
 }

@@ -194,7 +194,14 @@ so its arrival never shifts the layout. (Adopted from fc-fanfare-chess
 2026-08-28; the earlier destinations-left / menu-right shape is superseded.)
 Destination icons are stroke glyphs matching one line weight — an app's
 filled artwork (fc's Cburnett pieces) is content imagery, not iconography,
-and a filled mark is illegible on one of the two themes.
+and a filled mark is illegible on one of the two themes. **Three or more
+labelled destinations stack the icon over the label.** Side by side, three
+short labels ("New", "Draw", "Saved") needed 293px where the middle zone of a
+360px phone has 222px once the menu button, the reserved slot and both
+hairlines take theirs; the zone overflowed and pushed the reserved slot off
+the edge. bl-borderline hit it first at three destinations (2026-09-23);
+px-pixelart measured it (2026-09-25). The header's desktop copy of the same
+list stays inline.
 
 The expanded bottom sheet covers the nav (sheet z-30 over nav z-20). The peek
 does not: at rest it sits BELOW the nav's z (z-10 under z-20), anchored at the
@@ -219,10 +226,18 @@ An **overlay everywhere**: full viewport width on mobile,
 `var(--drawer-width-desktop)` on desktop, scrimmed (backdrop 40 + panel 50),
 dismissed by backdrop tap, Escape, swipe toward its edge, or Android back.
 
+**A drawer's elevation shadow is on only while it is open.** A drawer kept
+mounted and parked off-screen (so both slides animate) still casts its
+shadow: a `--shadow-xl` blur of 56px reaches that far into the viewport and
+paints a grey band down the edge it is parked behind, over the canvas, in both
+themes: the left edge for this drawer, the right edge for the chat drawer on
+mobile. Put the shadow class on the open state only, never on the panel's base
+classes (found by screenshot in px-pixelart, 2026-09-25).
+
 ### Right drawer — AI chat
 
 - **Mobile: overlay**, full viewport width, scrimmed 40 + 50 — identical
-  mechanics to the left drawer.
+  mechanics to the left drawer, including the open-only shadow.
 - **Desktop: push/split pane** at `var(--drawer-width-desktop)`. The canvas
   takes the remaining width and the 60% column cap is dropped while split —
   overlaying a 50vw panel on a 60vw column just hides the app. In-flow, no
@@ -371,6 +386,9 @@ its overlay registry and mark the shell `inert` while it is above zero. Per-
 surface flags (`menuOpen || chatOpen || …`) miss every modal rendered outside
 the shell; fc-fanfare-chess left the page reachable behind its portaled
 confirm, promotion and install dialogs that way until 2026-09-23.
+Focus restore on close must wait until the shell is no longer inert: a
+page-owned modal unmounts while the attribute is still set, and `focus()` into
+an inert subtree silently fails (BURGER_MENU.md `useFocusTrap`).
 bl-borderline and fc-fanfare-chess `src/lib/layoutStore.js` are the
 reference.
 
