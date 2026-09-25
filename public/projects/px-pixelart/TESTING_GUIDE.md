@@ -1,10 +1,10 @@
 # Testing Guide
 
 Manual scenarios with exact actions and expected results. Every scenario below
-except 13 and the one-tap install in 20 was run in a browser on 2026-09-25 at
-phone, landscape-phone and desktop sizes, and passed. Scenarios 13 and 20's
-one-tap install need a real phone and have not been run yet. A phone-sized
-window unless a scenario says otherwise.
+except 13 and the one-tap install in 20 was run in a browser at phone,
+landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 21 and 22
+on 2026-09-26). Scenarios 13 and 20's one-tap install need a real phone and
+have not been run yet. A phone-sized window unless a scenario says otherwise.
 
 ## Scenarios
 
@@ -170,7 +170,7 @@ button.
 
 ### 16. How it works
 1. Menu → **How it works**. The menu closes first, then the guide opens with
-   eight steps that match the app.
+   nine steps that match the app.
 2. Press Back. The guide closes; the app stays open. **Got it** also closes it.
 
 ### 17. Layout at three sizes
@@ -204,6 +204,31 @@ button.
 2. On an Android phone in Chrome (not yet run for this app): **Install app**
    shows the browser's own install prompt.
 
+### 21. Insert rows and columns
+1. Create a 3 × 4 grid. Colour square 2 in row 1 red.
+2. Tap that red square. Under **Rows and columns** the text names "row 1,
+   column 2". Tap **Insert row above**.
+- The window closes, "Inserted a row." shows, and the picture is 4 × 4: a blank
+  row on top, the red square now in row 2, column 2. The status reads "Not
+  saved yet" (or "Changes not saved" for a saved picture).
+3. Tap the red square again, then **Insert column left**. The picture is 4 × 5
+   and the red square is now in column 3; the new column is blank.
+4. **Insert row below** and **Insert column right** add the blank line on the
+   other side of the tapped square.
+5. Create a 64 × 2 grid and tap a square.
+- **Insert row above** and **Insert row below** are off, with "This picture
+  already has the most rows (64)."; the column buttons still work.
+6. Save the picture, reload, and open it from **Saved**: the inserted rows and
+   columns are there.
+
+### 22. Blank squares in dark mode
+1. Menu → **Dark mode**, then create a 4 × 4 grid.
+- Every square is black. Tapping one shows `#000000`, and **Pick all #000000
+  squares** picks all 16.
+2. Insert a row. Its squares are black.
+3. Switch to **Light mode**. The black squares stay black; a new grid made now
+   is white, and a row inserted now is white.
+
 ## Regression checklist
 
-Before shipping a change, rerun: 1, 3, 4, 5, 7, 8, 10, 11, 12.1, 14, 17, 18.
+Before shipping a change, rerun: 1, 3, 4, 5, 7, 8, 10, 11, 12.1, 14, 17, 18, 21, 22.
