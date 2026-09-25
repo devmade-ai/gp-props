@@ -15,10 +15,8 @@ Delete an item when it is done — git history is the record.
 
 ## Fleet propagation
 
-- [ ] **Port two APP_SHELL fixes to bl-borderline.** `ChatDrawer.jsx` keeps
-  `shadow-xl` on its base classes while mounted off-screen for any open friend
-  game, the grey-band bug `MenuDrawer.jsx` had until `fa8fe41` (APP_SHELL.md
-  "Left drawer"); and `useFocusTrap.js` restores focus synchronously, which
-  fails behind the inert shell (BURGER_MENU.md `useFocusTrap`). Both read from
-  code on 2026-09-25, not run. Check fc-fanfare-chess, which shares the
-  layoutStore and the hook, for the same two.
+- [ ] **Check fc-fanfare-chess for two APP_SHELL bugs.** A drawer kept
+  mounted off-screen with its shadow on the base classes (APP_SHELL.md "Left
+  drawer"), and `useFocusTrap` restoring focus synchronously behind the inert
+  shell (BURGER_MENU.md `useFocusTrap`). It shares bl-borderline's layoutStore
+  and hook; bl-borderline had both, fixed in `0ebc860` (2026-09-25).
