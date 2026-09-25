@@ -1,18 +1,21 @@
 # Testing Guide
 
 Manual scenarios with exact actions and expected results. Every scenario below
-except 13 and the one-tap install in 20 was run in a browser on 2026-09-25 at
-phone, landscape-phone and desktop sizes, and passed. Scenarios 13 and 20's
-one-tap install need a real phone and have not been run yet. A phone-sized
-window unless a scenario says otherwise.
+except 13 and the one-tap install in 20 was run in a browser at phone,
+landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 21 and
+22, and the preset sizes and empty boxes in 1–3, on 2026-09-26). Scenarios 13
+and 20's one-tap install need a real phone and have not been run yet. A
+phone-sized window unless a scenario says otherwise.
 
 ## Scenarios
 
 ### 1. First load
 1. Open the app.
 - The header shows the Pixel Art mark (a white pixel heart) and name. The New
-  screen shows **New picture** with **Rows** 16, **Columns** 16 and
-  **Create grid**.
+  screen shows **New picture** with four buttons, **8 × 8**, **16 × 16**,
+  **32 × 32** and **64 × 64**, then **Custom size** with **Rows** and
+  **Columns** boxes that are EMPTY (grey example text "e.g. 12" and "e.g. 20",
+  no value), "1 to 64" under each, and **Create grid**.
 - The bottom nav shows the menu button (left), **New** (highlighted),
   **Saved**, and an empty slot on the right. There is no **Draw** yet.
 - A "Ready for offline use." toast appears once the service worker installs.
@@ -24,10 +27,14 @@ window unless a scenario says otherwise.
   from 1 to 64." Focus moves to Rows. Nothing is created; the page stays on New.
 2. Type `abc` or `1.5` in either box and tap **Create grid**.
 - The box says to type a number from 1 to 64.
-3. Change a box. Its message disappears.
+3. Clear both boxes and tap **Create grid**.
+- Both boxes say to type a number from 1 to 64; nothing is created.
+4. Change a box. Its message disappears.
 
 ### 3. Create a grid
-1. Type 8 and 12, tap **Create grid**.
+1. Tap **16 × 16**. The Draw screen opens with a 16 × 16 white grid, no
+   question asked (nothing was open). Go back to **New**.
+2. Type 8 and 12, tap **Create grid**.
 - The Draw screen opens: "Unsaved picture", "8 × 12 · Not saved yet",
   **Save** and **Save as new** under it, and a white grid of 96 squares that
   fits the screen width. **Draw** appears in the bottom nav, highlighted.
@@ -129,7 +136,8 @@ button.
   After deleting, Saved shows "No saved pictures yet." with **New picture**.
   Draw still shows it with its name, status "Not saved yet", and **Save**
   asks for a name again, suggesting the old one.
-6. On New, with changes that aren't saved, tap **Create grid**.
+6. On New, with changes that aren't saved, tap **16 × 16** (a custom size
+   with **Create grid** asks the same way).
 - "Start a new picture?" **Keep drawing it** stays; **Start new picture**
   opens the new blank grid. A blank or saved picture is replaced without
   asking.
@@ -170,7 +178,7 @@ button.
 
 ### 16. How it works
 1. Menu → **How it works**. The menu closes first, then the guide opens with
-   eight steps that match the app.
+   nine steps that match the app.
 2. Press Back. The guide closes; the app stays open. **Got it** also closes it.
 
 ### 17. Layout at three sizes
@@ -204,6 +212,31 @@ button.
 2. On an Android phone in Chrome (not yet run for this app): **Install app**
    shows the browser's own install prompt.
 
+### 21. Insert rows and columns
+1. Create a 3 × 4 grid. Colour square 2 in row 1 red.
+2. Tap that red square. Under **Rows and columns** the text names "row 1,
+   column 2". Tap **Insert row above**.
+- The window closes, "Inserted a row." shows, and the picture is 4 × 4: a blank
+  row on top, the red square now in row 2, column 2. The status reads "Not
+  saved yet" (or "Changes not saved" for a saved picture).
+3. Tap the red square again, then **Insert column left**. The picture is 4 × 5
+   and the red square is now in column 3; the new column is blank.
+4. **Insert row below** and **Insert column right** add the blank line on the
+   other side of the tapped square.
+5. Create a 64 × 2 grid and tap a square.
+- **Insert row above** and **Insert row below** are off, with "This picture
+  already has the most rows (64)."; the column buttons still work.
+6. Save the picture, reload, and open it from **Saved**: the inserted rows and
+   columns are there.
+
+### 22. Blank squares in dark mode
+1. Menu → **Dark mode**, then create a 4 × 4 grid.
+- Every square is black. Tapping one shows `#000000`, and **Pick all #000000
+  squares** picks all 16.
+2. Insert a row. Its squares are black.
+3. Switch to **Light mode**. The black squares stay black; a new grid made now
+   is white, and a row inserted now is white.
+
 ## Regression checklist
 
-Before shipping a change, rerun: 1, 3, 4, 5, 7, 8, 10, 11, 12.1, 14, 17, 18.
+Before shipping a change, rerun: 1, 3, 4, 5, 7, 8, 10, 11, 12.1, 14, 17, 18, 21, 22.

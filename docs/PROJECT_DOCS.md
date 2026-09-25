@@ -2,7 +2,7 @@
 
 How to maintain the mirrored project docs on the gp-props portfolio site.
 
-**Last mirrored:** 2026-09-25
+**Last mirrored:** 2026-09-26
 
 ## Current Status
 
@@ -26,7 +26,7 @@ How to maintain the mirrored project docs on the gp-props portfolio site.
 | kl-website | private | Scrubbed | **No** | **No** | **No** | Mirrored without being recorded here — added 2026-08-03. Only a README is present; user guide, testing guide and tutorial were never mirrored. |
 | web-arch | private | Scrubbed | Yes | Yes | **No** | Branded "redline", a knowless sub-brand. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
 | bl-borderline | private | Scrubbed | Yes | Scrubbed | Yes | Added 2026-09-23. README: removed Getting Started (commands) and the internal data-doc link. User Guide copied as-is (no commands, paths or env vars). Testing Guide: removed local setup, server commands, npm checks, the automated-checks section and the alpha debug-pill scenario. Tutorial from `src/components/TutorialModal.jsx`. |
-| px-pixelart | private | Scrubbed | Yes | Scrubbed | Yes | Added 2026-09-25. README: removed Getting started (commands). User Guide copied as-is (no commands, paths or env vars). Testing Guide: removed local setup, server commands, the storage-filling console snippet, local URLs, rebuild steps and the automated-checks section. Tutorial from `src/components/TutorialModal.jsx`. |
+| px-pixelart | private | Scrubbed | Yes | Scrubbed | Yes | Added 2026-09-25; re-mirrored 2026-09-26 (inserting rows and columns, black blank squares in dark mode, preset sizes and empty custom-size boxes). README: removed Getting started (commands). User Guide copied as-is (no commands, paths or env vars). Testing Guide: removed local setup, server commands, the storage-filling console snippet, local URLs, rebuild steps and the automated-checks section. Tutorial from `src/components/TutorialModal.jsx`. |
 | dm-website | private | Scrubbed | Yes | Yes | **No** | The devmade studio front-door site. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
 
 ### Internal Tools

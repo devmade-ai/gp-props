@@ -5,13 +5,17 @@ squares you want, then colour the squares.
 
 ## Start a picture
 
-1. On the **New** screen, type how many **Rows** and **Columns** you want.
-   Each can be from 1 to 64. Both start at 16.
-2. Tap **Create grid**. The picture opens on the **Draw** screen, with every
-   square white.
+1. On the **New** screen, tap one of the ready-made sizes: **8 × 8**,
+   **16 × 16**, **32 × 32** or **64 × 64**. The picture opens straight away.
+2. For any other size, go to **Custom size** and type how many **Rows** and
+   **Columns** you want, from 1 to 64 each. The boxes start empty; the grey
+   example text in them is only a hint.
+3. Tap **Create grid**. The picture opens on the **Draw** screen, with every
+   square white, or black if the app is in dark mode. The squares keep that
+   colour if you switch modes later.
 
-If a number is outside 1 to 64, or isn't a number, the box says so and nothing
-is created.
+If a box is empty, or its number is outside 1 to 64 or isn't a number, the box
+says so and nothing is created.
 
 If the picture you were drawing has changes that aren't saved, the app asks
 before starting a new one: **Start new picture** throws those changes away,
@@ -44,13 +48,26 @@ The square you tapped is already picked.
 
 - Tap more squares to pick them. Tap a picked square again to unpick it.
 - **Pick all #RRGGBB squares** picks every square that has the same colour as
-  the one you tapped. For example, on a new picture it picks every white
+  the one you tapped. For example, on a new picture it picks every blank
   square, which fills the background.
 - **Pick all** picks every square; **Unpick all** clears the picks.
 
 Picked squares have a ring and show the new colour, so you can see the result
 before you apply it. The button at the bottom says how many squares it will
 colour, such as **Colour 12 squares**.
+
+### Insert a row or column
+
+In the colour window, under **Rows and columns**:
+- **Insert row above** and **Insert row below** add a blank row next to the
+  square you tapped.
+- **Insert column left** and **Insert column right** add a blank column next
+  to it.
+
+The new squares are white, or black if the app is in dark mode. The window
+closes and the picture grows by one row or column; the other squares keep
+their colours. A picture can have up to 64 rows and 64 columns; once it has
+64, those buttons are off and the window says why.
 
 ### Copy and paste a colour
 
