@@ -194,7 +194,13 @@ so its arrival never shifts the layout. (Adopted from fc-fanfare-chess
 2026-08-28; the earlier destinations-left / menu-right shape is superseded.)
 Destination icons are stroke glyphs matching one line weight — an app's
 filled artwork (fc's Cburnett pieces) is content imagery, not iconography,
-and a filled mark is illegible on one of the two themes.
+and a filled mark is illegible on one of the two themes. **Three or more
+labelled destinations stack the icon over the label.** Side by side, three
+short labels ("New", "Draw", "Saved") needed 293px where the middle zone of a
+360px phone has 222px once the menu button, the reserved slot and both
+hairlines take theirs; the zone overflowed and pushed the reserved slot off
+the edge (measured in px-pixelart, 2026-09-25). Two side-by-side destinations
+fit (bl-borderline). The header's desktop copy of the same list stays inline.
 
 The expanded bottom sheet covers the nav (sheet z-30 over nav z-20). The peek
 does not: at rest it sits BELOW the nav's z (z-10 under z-20), anchored at the
@@ -218,6 +224,14 @@ triad above).
 An **overlay everywhere**: full viewport width on mobile,
 `var(--drawer-width-desktop)` on desktop, scrimmed (backdrop 40 + panel 50),
 dismissed by backdrop tap, Escape, swipe toward its edge, or Android back.
+
+**The elevation shadow is on only while the drawer is open.** A drawer kept
+mounted and parked off-screen with `translateX(-100%)` (so both slides
+animate) still casts its shadow: a `--shadow-xl` blur of 56px reaches that far
+into the viewport and paints a grey band down the left edge of every screen,
+over the canvas, in both themes. Put the shadow class on the open state only,
+never on the panel's base classes (found by screenshot in px-pixelart,
+2026-09-25; bl-borderline's `MenuDrawer.jsx` carries the base-class shadow).
 
 ### Right drawer — AI chat
 
