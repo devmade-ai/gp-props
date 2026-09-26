@@ -6,16 +6,17 @@ Make pixel pictures: choose how many rows and columns, then colour the squares.
 - **Any grid size.** One tap for 8 × 8, 16 × 16, 32 × 32 or 64 × 64, or type
   any size from 1 to 64 rows and 1 to 64 columns. Every square
   starts white, or black when the app is in dark mode.
-- **Insert rows and columns.** From a square's colour window, insert a blank
-  row above or below it, or a column to its left or right, up to 64 each.
-- **Colour window.** Tap a square to pick its colour with the device's colour
-  picker, type a colour code such as #FF8800, or tap a colour already used in
-  the picture.
-- **Copy and paste colours.** Copy a square's colour code, then paste it into
-  another square's colour window. Codes pasted from other apps work too.
-- **Colour many squares at once.** In the colour window, tap more squares on
-  the picture to pick them, or pick every square that has the same colour as
-  the one tapped. Picked squares show the new colour before it is applied.
+- **Paint on tap.** Choose a colour above the picture, then every square you
+  tap takes it.
+- **Choosing colours.** The device's colour picker, a colour code such as
+  #FF8800, or one of the colours already in the picture.
+- **Copy and paste colours.** Copy the colour code, paste it later. Codes
+  pasted from other apps work too.
+- **Colour many squares at once.** Switch to Pick, tap squares (or pick every
+  square of one colour, or all of them) and colour them in one go. Changing
+  the colour unpicks them, so a colour never lands on the wrong squares.
+- **Insert and delete rows and columns.** Tap Insert or Delete, then an arrow
+  on the picture's edge. From 1 to 64 each way; deleting asks first.
 - **Save and Save as new.** Save keeps the picture under a name; saving again
   updates it. Save as new keeps a copy under a new name and leaves the original
   as it was.

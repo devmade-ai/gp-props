@@ -6,21 +6,21 @@ In-app walkthrough. Access anytime via the menu ("How it works").
 
 On the New screen, tap a ready-made size like 16 × 16, or type how many rows and columns you want, from 1 to 64 each, and tap “Create grid”. Every square starts white, or black in dark mode.
 
-## Step 2: Colour a square
+## Step 2: Choose a colour
 
-Tap a square to open the colour window. Pick a colour, type a colour code like #FF8800, or tap one of the colours already in your picture. Then tap “Colour”.
+Above the picture, tap the colour square to pick a colour, type a colour code like #FF8800, or tap one of the colours already in your picture. “Copy” and “Paste” copy a colour code and use it again.
 
-## Step 3: Colour many at once
+## Step 3: Paint
 
-In the colour window, tap more squares in the grid to pick them too, or tap “Pick all … squares” to pick every square that has the same colour as the one you tapped. Every picked square gets the new colour.
+With “Paint” on (below the picture), every square you tap takes that colour straight away.
 
-## Step 4: Add rows and columns
+## Step 4: Colour many at once
 
-In the colour window, “Insert row above”, “Insert row below”, “Insert column left” and “Insert column right” add blank squares next to the one you tapped, up to 64 each way.
+Tap “Pick”, then tap the squares you want (or “Same colour”, “All”). Tap “Colour” to give them all the colour. Changing the colour unpicks them, so choose the colour first.
 
-## Step 5: Copy and paste colours
+## Step 5: Insert or delete rows and columns
 
-“Copy” copies the colour code. Open another square and tap “Paste” to use the same colour there.
+Tap “Insert” or “Delete”. Arrows appear along the top and left of the picture: tap one to insert a blank row or column there, or to delete that one. Deleting asks first.
 
 ## Step 6: Save your picture
 
