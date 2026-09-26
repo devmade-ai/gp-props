@@ -90,6 +90,8 @@ picked before. Switching back to **Paint** unpicks them too.
    - **Delete:** there is an arrow for each row and each column. Tap one, and
      the app asks before removing it, because its squares and their colours
      go with it.
+   - On a picture too big for the screen, the arrows stay along the edges
+     while you scroll it, so there's no need to scroll back to the start.
 3. The arrows go away once a row or column is inserted or deleted. **Cancel**
    or Escape puts them away without changing anything.
 

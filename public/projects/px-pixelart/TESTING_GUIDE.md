@@ -3,7 +3,8 @@
 Manual scenarios with exact actions and expected results. Every scenario below
 except 13 and the one-tap install in 20 was run in a browser at phone,
 landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 1–9, 16, 21 and
-22 again on 2026-09-26 for the one-screen editor). Scenarios 13
+22 again on 2026-09-26 for the one-screen editor, including 21.10–21.12,
+arrows on a scrolled picture). Scenarios 13
 and 20's one-tap install need a real phone and have not been run yet. A
 phone-sized window unless a scenario says otherwise.
 
@@ -228,6 +229,16 @@ phone-sized window unless a scenario says otherwise.
 8. Create a 64 × 2 grid, tap **Insert**: only column arrows show, and the
    text says it already has the most rows (64).
 9. Save, reload, open from **Saved**: the changed rows and columns are there.
+10. Phone size. Create a 60 × 60 grid, scroll the picture to the middle, and
+    tap **Insert**: the squares don't move, and arrows show along the top
+    and left of the visible part, each lined up with its line. Scroll: the
+    arrows stay on the edges and keep lining up. **Cancel**: the squares
+    don't move.
+11. Scroll to the bottom-right corner, **Insert**, then the arrow right of
+    column 60: the new blank column is in view at the right edge. **Insert**,
+    then the arrow below row 60: the new row is in view at the bottom.
+12. Scroll back to the top-left, **Delete**: the view stays there, and row 1
+    and column 1 sit just inside the arrows, not under them.
 
 ### 22. Blank squares in dark mode
 1. Menu → **Dark mode**, then create a 4 × 4 grid.
