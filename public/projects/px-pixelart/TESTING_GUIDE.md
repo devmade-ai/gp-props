@@ -2,8 +2,8 @@
 
 Manual scenarios with exact actions and expected results. Every scenario below
 except 13 and the one-tap install in 20 was run in a browser at phone,
-landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 21 and
-22, and the preset sizes and empty boxes in 1–3, on 2026-09-26). Scenarios 13
+landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 1–9, 16, 21 and
+22 again on 2026-09-26 for the one-screen editor). Scenarios 13
 and 20's one-tap install need a real phone and have not been run yet. A
 phone-sized window unless a scenario says otherwise.
 
@@ -39,75 +39,68 @@ phone-sized window unless a scenario says otherwise.
   **Save** and **Save as new** under it, and a white grid of 96 squares that
   fits the screen width. **Draw** appears in the bottom nav, highlighted.
 
-### 4. Colour one square
-1. Tap the top-left square.
-- The colour window opens: **Colour squares**, the colour bar (white), the
-  colour code `#FFFFFF`, **Copy**, **Paste**, **Colours in this picture** (one
-  white sample, ringed), and **Squares to colour** with "1 square picked." and
-  the tapped square ringed.
-2. Type `#ff0000` in **Colour code**.
-- The colour bar turns red; the ringed square shows red.
-3. Tap **Colour 1 square**.
-- The window closes, the square is red, a "Coloured 1 square #FF0000." toast
-  shows, and the status still reads "Not saved yet".
-4. Open another square, type `00f` in the code box and tap outside the box.
-- The box tidies it to `#0000FF`.
+### 4. Paint squares
+1. Tap **16 × 16**. Above the grid: the black colour square, `#000000`, **Copy**,
+   **Paste**, and "In this picture" with one white sample. Below: **Paint**
+   (highlighted), **Pick**, **Insert**, **Delete**.
+2. Tap four squares. Each turns black at once; the status reads "Not saved
+   yet"; a black sample appears after "In this picture".
+3. Type `#ff0000` in the code box. The colour square turns red; tap a square:
+   it turns red.
+4. Clear the box and type `#ff8800` one character at a time. After `#ff8`
+   the box still shows `#ff8` (not `#FFFF88`), and typing carries on to
+   `#ff8800`. Leave the box: it tidies to `#FF8800`.
+5. Type `hello` and leave the box. An error under it explains what codes look
+   like.
+6. Save the picture, then tap a black square with black. The status stays
+   "Saved" (nothing changed).
 
 ### 5. Colour many squares at once
-1. Tap square 1 (row 1). In the window tap two more squares.
-- "3 squares picked." All three are ringed and show the chosen colour.
-2. Tap one of them again. It unpicks: "2 squares picked."
-3. Tap **Pick all #FFFFFF squares** (the code is the tapped square's colour).
-- Every white square is picked (93 on an 8 × 12 grid with three red squares).
-4. Tap **Unpick all**: nothing is picked and the Colour button is disabled.
-5. Tap **Pick all**, choose blue, tap **Colour 96 squares**. Every square
-   turns blue.
+1. Choose red. Tap **Pick**. The pick row appears: "Pick:" **Same colour**
+   (off), **All**, **None** (off), and **Pick squares to colour them** (off).
+2. Tap three squares. Each gets a ring; the button reads **Colour 3 squares**.
+   Tap one again: it unpicks (**Colour 2 squares**).
+3. Tap **Colour 2 squares**. Both turn red, the rings go, "Coloured 2 squares
+   #FF0000." shows.
+4. Pick one white square, tap **Same colour**: every white square is picked.
+   **None** unpicks all; **All** picks every square.
+5. With squares picked, tap a sample, type a code, use the picker or **Paste**.
+- The picks are gone and "Colour changed, so the picked squares were
+  unpicked." shows. No square changed colour.
+6. With squares picked, tap **Paint**. The picks are gone.
 
 ### 6. Colours in this picture
-1. With red and blue squares on the picture, open any square.
-- Two samples, most-used first. The one matching the current colour is ringed.
-2. Tap the red sample. The code box reads `#FF0000` and the bar turns red.
+1. With red, black and white squares on the picture, the samples list all
+   three, most-used first. The current colour's sample has a ring.
+2. Tap the red sample. The code box reads `#FF0000`.
+3. Use 20 different colours: the sample row scrolls sideways instead of
+   pushing the grid down.
 
 ### 7. Copy and paste
-1. Open a red square, tap **Copy**.
-- "Copied #FF0000." toast. The clipboard holds `#FF0000`.
-2. Close the window. Open a blue square, tap **Paste** (allow clipboard access
-   if the browser asks).
-- "Pasted #FF0000." The code box reads `#FF0000`. **Colour 1 square** makes
-  it red.
-3. Copy the text `color: #ff8800;` from anywhere, open a square, tap **Paste**.
-- The code box reads `#FF8800`.
-4. Copy `rgb(255, 0, 0)`, open a square, tap **Paste**.
-- A toast says what was copied isn't a colour code and what codes look like.
-  The code box keeps its colour.
-5. In a browser that refuses clipboard reading (deny the permission when
-   asked), tap **Paste**.
-- A toast says to press and hold the colour code box and choose Paste; focus
-  moves to the box. (Run headless by making `readText` reject: headless
-  Chromium never shows the permission prompt, so an ungranted read just
-  waits.)
-6. Type `#ff88` in the code box and tap **Colour 1 square**.
-- An error under the box explains what codes look like; the window stays open.
+1. With red current, tap **Copy**: "Copied #FF0000." The clipboard holds
+   `#FF0000`.
+2. Choose blue, then tap **Paste** (allow clipboard access if asked):
+   "Pasted #FF0000." and red is current again.
+3. Copy the text `color: #ff8800;` from anywhere and tap **Paste**: the
+   current colour is `#FF8800`.
+4. Copy `rgb(255, 0, 0)` and tap **Paste**: a toast says it isn't a colour
+   code and what codes look like; the colour doesn't change.
+5. In a browser that refuses clipboard reading, tap **Paste**: a toast says to
+   press and hold the code box and choose Paste; focus moves to the box.
+   (Run headless by making `readText` reject.)
 
-### 8. Closing the colour window changes nothing
-With a new colour chosen but not applied, close the window each of these ways:
-**Cancel**, the ✕, tapping outside the window, Escape, the browser/phone Back
-button.
-- The window closes, no square changes, and after Back the app is still on
-  the Draw screen (Back did not leave the page).
+### 8. Nothing happens by accident
+1. In Insert or Delete mode, tap a square: nothing changes.
+2. In Pick mode, tap squares: nothing is coloured until **Colour N squares**.
+3. Changing the colour never recolours picked squares (5.5).
 
 ### 9. Keyboard use
 1. Tab to the grid. Only one square takes focus from Tab.
 2. Arrow keys move one square; Home and End go to the row's first and last
    square; Ctrl+Home and Ctrl+End go to the first and last square.
-3. Enter opens the colour window with that square picked.
-4. In the window's grid, Space picks and unpicks the focused square.
-5. With the window open, Tab stays inside it, and the page behind can't be
-   reached.
-6. Press Escape. The window closes and focus is back on the square that
-   opened it. Open it again with Enter and press **Colour 1 square**: focus
-   is again on that square. The same holds for the Save as new name box:
-   Escape puts focus back on **Save as new**.
+3. With **Paint** on, Enter paints the focused square. With **Pick** on,
+   Space picks and unpicks it.
+4. In Insert mode, Tab reaches the edge arrows; Enter on one inserts.
 
 ### 10. Save and Save as new
 1. On a new, coloured picture tap **Save**.
@@ -152,10 +145,9 @@ button.
   "Not saved yet". After freeing the space, saving works.
 
 ### 13. On-screen keyboard (real phone only, not yet run)
-1. On an iPhone (Safari) and an Android phone (Chrome), open a square and tap
-   the **Colour code** box.
-- The colour window moves or shrinks so the box stays visible above the
-  keyboard. The bottom nav does not move.
+1. On an iPhone (Safari) and an Android phone (Chrome), open a picture and
+   tap the colour code box above the grid.
+- The box stays visible above the keyboard. The bottom nav does not move.
 2. Tap **Save**, the first time, so the name box opens.
 - The name box and its buttons stay visible above the keyboard.
 
@@ -183,14 +175,16 @@ button.
 
 ### 17. Layout at three sizes
 1. 360×740 phone: the bottom nav fits (menu, New, Draw, Saved, empty slot),
-   each destination with its icon over its label. The Draw screen's name and
-   status sit on one line, the buttons under them.
-2. 844×390 landscape phone: phone layout stays (bottom nav visible). A grid
-   taller than the space scrolls.
+   each destination with its icon over its label. The Draw screen fits with
+   no scrolling in Paint, Pick and Insert modes: save bar on one row, colour
+   controls above the grid, tools below it.
+2. 844×390 landscape phone: phone layout stays (bottom nav visible). The
+   controls, the grid (squares at their 16px floor) and the tools don't all
+   fit in 390px, so the Draw screen scrolls up and down; nothing is wider
+   than the screen.
 3. 1280×800 desktop: no bottom nav; **New**, **Draw**, **Saved** and the menu
-   button are in the header. The 16 × 16 grid fits the screen height. The
-   colour window is 90% of the width and height, with the colour controls on
-   the left and the squares on the right.
+   button are in the header. The 16 × 16 grid fits between the colour
+   controls and the tools.
 
 ### 18. Offline
 1. Load the app once online and wait for "Ready for offline use.".
@@ -212,27 +206,33 @@ button.
 2. On an Android phone in Chrome (not yet run for this app): **Install app**
    shows the browser's own install prompt.
 
-### 21. Insert rows and columns
-1. Create a 3 × 4 grid. Colour square 2 in row 1 red.
-2. Tap that red square. Under **Rows and columns** the text names "row 1,
-   column 2". Tap **Insert row above**.
-- The window closes, "Inserted a row." shows, and the picture is 4 × 4: a blank
-  row on top, the red square now in row 2, column 2. The status reads "Not
-  saved yet" (or "Changes not saved" for a saved picture).
-3. Tap the red square again, then **Insert column left**. The picture is 4 × 5
-   and the red square is now in column 3; the new column is blank.
-4. **Insert row below** and **Insert column right** add the blank line on the
-   other side of the tapped square.
-5. Create a 64 × 2 grid and tap a square.
-- **Insert row above** and **Insert row below** are off, with "This picture
-  already has the most rows (64)."; the column buttons still work.
-6. Save the picture, reload, and open it from **Saved**: the inserted rows and
-   columns are there.
+### 21. Insert and delete rows and columns
+1. Create a 3 × 4 grid and paint square 2 of row 1 red.
+2. Tap **Insert**. Arrows appear: 4 along the left (above row 1, between
+   rows, below row 3) and 5 along the top; the text says to tap an arrow;
+   **Cancel** is next to it; tapping a square does nothing.
+3. Tap the arrow above row 1. "Inserted a row." shows, the picture is 4 × 4
+   with a blank top row, the red square is now in row 2, and the arrows are
+   gone.
+4. **Insert** again, then the top arrow left of column 1: 4 × 5, red square
+   now in column 3.
+5. **Insert**, then **Cancel**: arrows gone, nothing changed. **Insert**, then
+   Escape: the same.
+6. Tap **Delete**. Arrows appear, one per row (4) and one per column (5).
+   Tap the one for row 2 (the red square's row): "Delete row 2?" says its 5
+   squares and their colours are removed. **Keep it**: nothing changes and the
+   arrows stay. Tap it again, **Delete**: "Deleted row 2.", 3 × 5, arrows
+   gone.
+7. Create a 1 × 3 grid, tap **Delete**: only column arrows show, and the text
+   says a picture needs at least one row.
+8. Create a 64 × 2 grid, tap **Insert**: only column arrows show, and the
+   text says it already has the most rows (64).
+9. Save, reload, open from **Saved**: the changed rows and columns are there.
 
 ### 22. Blank squares in dark mode
 1. Menu → **Dark mode**, then create a 4 × 4 grid.
-- Every square is black. Tapping one shows `#000000`, and **Pick all #000000
-  squares** picks all 16.
+- Every square is black, and the current colour starts white. With **Pick**,
+  pick one square and tap **Same colour**: all 16 are picked.
 2. Insert a row. Its squares are black.
 3. Switch to **Light mode**. The black squares stay black; a new grid made now
    is white, and a row inserted now is white.

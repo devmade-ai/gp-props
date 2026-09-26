@@ -25,63 +25,77 @@ asking, because nothing is lost.
 The New screen also shows the picture you're drawing, with **Continue** to go
 back to it.
 
-## Colour squares
+## The Draw screen
 
-1. On the **Draw** screen, tap a square. The colour window opens.
-2. Choose a colour in any of these ways:
-   - Tap the big colour bar under **Pick a colour** to use your device's
-     colour picker.
-   - Type a colour code in **Colour code**, such as `#FF8800`. Codes have a
-     `#` and six letters or numbers (0 to 9 and A to F); the short form
-     `#F80` works too.
-   - Tap one of the samples under **Colours in this picture** to reuse a
-     colour you've already used. The picked one has a ring round it.
-3. Tap **Colour 1 square**. The window closes and the square changes.
+From top to bottom: the picture's name and **Save** buttons, the colour
+controls, the picture, and the tools.
 
-**Cancel**, the ✕, tapping outside the window, Escape and the phone's Back
-button all close the window without changing anything.
+## Choose a colour
 
-### Colour many squares at once
+The colour controls sit above the picture. The colour shown there is the
+**current colour**: what a tap paints, and what **Colour** gives picked
+squares. It starts black (white if the app is in dark mode), so your first
+tap shows up on the blank picture.
 
-In the colour window, under **Squares to colour**, the picture is shown again.
-The square you tapped is already picked.
-
-- Tap more squares to pick them. Tap a picked square again to unpick it.
-- **Pick all #RRGGBB squares** picks every square that has the same colour as
-  the one you tapped. For example, on a new picture it picks every blank
-  square, which fills the background.
-- **Pick all** picks every square; **Unpick all** clears the picks.
-
-Picked squares have a ring and show the new colour, so you can see the result
-before you apply it. The button at the bottom says how many squares it will
-colour, such as **Colour 12 squares**.
-
-### Insert a row or column
-
-In the colour window, under **Rows and columns**:
-- **Insert row above** and **Insert row below** add a blank row next to the
-  square you tapped.
-- **Insert column left** and **Insert column right** add a blank column next
-  to it.
-
-The new squares are white, or black if the app is in dark mode. The window
-closes and the picture grows by one row or column; the other squares keep
-their colours. A picture can have up to 64 rows and 64 columns; once it has
-64, those buttons are off and the window says why.
+- Tap the colour square to use your device's colour picker.
+- Type a colour code in the box next to it, such as `#FF8800`. Codes have a
+  `#` and six letters or numbers (0 to 9 and A to F); the short form `#F80`
+  works too. If what you typed isn't a code, the box says what codes look
+  like when you leave it.
+- Tap one of the samples after **In this picture** to reuse a colour you've
+  already used. The current one has a ring round it. The row scrolls
+  sideways when there are many.
 
 ### Copy and paste a colour
 
-- **Copy** copies the colour code in the box, such as `#FF8800`.
-- **Paste** puts a copied colour code into the box. It also finds the code in
-  text copied from other apps, such as `color: #ff8800;`.
-
-To give one square the same colour as another: tap the first square, tap
-**Copy**, close the window, tap the second square, tap **Paste**, then tap
-**Colour 1 square**.
+- **Copy** copies the current colour code, such as `#FF8800`.
+- **Paste** makes a copied colour code the current colour. It also finds the
+  code in text copied from other apps, such as `color: #ff8800;`.
 
 If what you copied isn't a colour code, the app says so and keeps the colour
 you had. Some browsers don't let apps read what you copied; the app then
-tells you to press and hold the **Colour code** box and choose **Paste**.
+tells you to press and hold the colour code box and choose **Paste**.
+
+## Paint squares
+
+Below the picture, **Paint** is on when you open a picture. Tap any square and
+it takes the current colour straight away. Tapping a square that already has
+that colour changes nothing.
+
+## Colour many squares at once
+
+1. Choose the colour first.
+2. Tap **Pick** (below the picture). Now a tap picks a square instead of
+   painting it; picked squares have a ring. Tap a picked square again to
+   unpick it.
+3. To pick faster, after **Pick:**
+   - **Same colour** picks every square that has the colour of the last
+     square you picked. On a new picture, pick one blank square, then
+     **Same colour**, to fill the background.
+   - **All** picks every square; **None** unpicks them all.
+4. Tap **Colour 12 squares** (it says how many). They all take the current
+   colour and are unpicked.
+
+Changing the colour while squares are picked unpicks them, and the app says
+so. That way a colour meant for the next squares never lands on the ones you
+picked before. Switching back to **Paint** unpicks them too.
+
+## Insert or delete a row or column
+
+1. Tap **Insert** or **Delete** below the picture.
+2. Arrows appear along the top and left edges of the picture, and tapping the
+   squares does nothing until you're done.
+   - **Insert:** the arrows sit on the lines between rows and between
+     columns, and at both ends. Tap one to add a blank row or column there.
+   - **Delete:** there is an arrow for each row and each column. Tap one, and
+     the app asks before removing it, because its squares and their colours
+     go with it.
+3. The arrows go away once a row or column is inserted or deleted. **Cancel**
+   or Escape puts them away without changing anything.
+
+New squares are white, or black if the app is in dark mode. A picture has
+from 1 to 64 rows and 1 to 64 columns: at 64, the insert arrows for that
+direction don't show; at 1, the delete arrows don't, and the app says why.
 
 ## Save your picture
 
@@ -116,11 +130,11 @@ and when it was saved. The one you're drawing is marked **Open now**.
 
 ## Use the keyboard
 
-On the Draw screen and in the colour window, the picture is one stop for the
-Tab key. The arrow keys move between squares, Home and End go to the start
-and end of a row, and Ctrl+Home / Ctrl+End go to the first and last square.
-Enter or Space opens the colour window (on the Draw screen) or picks and
-unpicks the square (in the colour window).
+The picture is one stop for the Tab key. The arrow keys move between squares,
+Home and End go to the start and end of a row, and Ctrl+Home / Ctrl+End go to
+the first and last square. Enter or Space paints the square (with **Paint**
+on) or picks and unpicks it (with **Pick** on). The insert and delete arrows
+are buttons you can reach with Tab.
 
 ## Menu
 

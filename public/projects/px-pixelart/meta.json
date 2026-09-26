@@ -17,8 +17,8 @@
   "audience": "Anyone who wants to make a small pixel picture on a phone or a computer, without an account or a drawing program.",
   "useCases": [
     "A child picks a 16 × 16 grid on a parent's phone, colours a pixel heart square by square, and saves it to show later",
-    "Someone planning a cross-stitch or bead pattern sets the exact rows and columns, fills the background in one go with \"Pick all\", and keeps several versions with Save as new",
-    "A designer copies a brand colour code from another app and pastes it into the colour window to use the exact shade",
+    "Someone planning a cross-stitch or bead pattern sets the exact rows and columns, picks the whole background in one go and colours it, and keeps several versions with Save as new",
+    "A designer copies a brand colour code from another app and pastes it into the colour-code box above the picture to use the exact shade",
     "A teacher sketches a simple pixel icon for a lesson on a laptop, saves it, and opens it again the next day to finish it, offline"
   ],
   "dataPrivacy": {
