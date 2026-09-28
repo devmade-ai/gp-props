@@ -1583,6 +1583,8 @@ The hash-based alternative (`script-src 'sha256-...'`) is tempting but brittle: 
 
 Two directives silently break a PWA and belong in any policy: **`worker-src 'self'`** (the service worker) and **`manifest-src 'self'`** (the webmanifest).
 
+**The GA4 loader, the fleet's fourth head script, needs its hosts in the same policy:** `https://www.googletagmanager.com` in `script-src`; `https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://stats.g.doubleclick.net https://www.google.com` in `connect-src`; and `https://*.google-analytics.com https://*.googletagmanager.com` in `img-src` unless it is already a blanket `https:`. `www.google.com` is the one the fleet missed: gtag.js retries a hit that `google-analytics.com` failed (an ad blocker, a dropped connection) on `https://www.google.com/g/collect`, and without it every such retry logs a CSP refusal. Reproduced in headless Chromium on gp-props and px-pixelart, 2026-09-27, by aborting `google-analytics.com` requests.
+
 This applies to gp-props itself, which keeps four inline classic scripts in its head partial — all four would need externalising the day it adopts a strict CSP.
 
 ## Platform Gotchas

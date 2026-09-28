@@ -24,8 +24,8 @@
   "dataPrivacy": {
     "storage": "The picture being drawn and every saved picture are kept in the browser's local storage, on the device only.",
     "authentication": "None. There are no accounts.",
-    "transmission": "Nothing is sent anywhere. Once loaded, the app works with the network switched off.",
-    "thirdParty": "None at runtime. The clipboard is read only when Paste is tapped, and only with the browser's permission."
+    "transmission": "Pictures are never sent anywhere. Visits are counted with Google Analytics. Once loaded, the app works with the network switched off.",
+    "thirdParty": "Google Analytics (GA4) counts visits and sets its own cookies. The clipboard is read only when Paste is tapped, and only with the browser's permission."
   },
   "docs": {
     "readme": true,

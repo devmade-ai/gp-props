@@ -4,7 +4,8 @@ Manual scenarios with exact actions and expected results. Every scenario below
 except 13 and the one-tap install in 20 was run in a browser at phone,
 landscape-phone and desktop sizes, and passed (2026-09-25; scenarios 1–9, 16, 21 and
 22 again on 2026-09-26 for the one-screen editor, including 21.10–21.12,
-arrows on a scrolled picture). Scenarios 13
+arrows on a scrolled picture; 1 and 18 again on 2026-09-27 with Google
+Analytics added). Scenarios 13
 and 20's one-tap install need a real phone and have not been run yet. A
 phone-sized window unless a scenario says otherwise.
 
@@ -20,7 +21,12 @@ phone-sized window unless a scenario says otherwise.
 - The bottom nav shows the menu button (left), **New** (highlighted),
   **Saved**, and an empty slot on the right. There is no **Draw** yet.
 - A "Ready for offline use." toast appears once the service worker installs.
-- No errors in the console.
+- No errors in the console, and no "Refused to" Content Security Policy
+  messages.
+- DevTools → Network: `gtag/js?id=G-XJT6HWWFEP` loads from
+  www.googletagmanager.com, then a `collect` request to
+  www.google-analytics.com answers 204 (a browser ad blocker stops both; that
+  is expected and the app works the same).
 
 ### 2. Grid size limits
 1. Type 0 in **Rows** and 65 in **Columns**, tap **Create grid**.
@@ -190,8 +196,10 @@ phone-sized window unless a scenario says otherwise.
 ### 18. Offline
 1. Load the app once online and wait for "Ready for offline use.".
 2. Go offline.
-3. Open any address inside the app. The New screen loads with no failed
-   requests; a grid can be created and coloured.
+3. Open any address inside the app. The New screen loads; the only failed
+   requests are Google Analytics' (`gtag/js` and `collect`), and none is a
+   "Refused to" Content Security Policy message. A grid can be created and
+   coloured.
 
 ### 19. Updates
 1. With the app open, publish a new version.

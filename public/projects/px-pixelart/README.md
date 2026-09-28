@@ -41,4 +41,5 @@ Make pixel pictures: choose how many rows and columns, then colour the squares.
 
 React 19, Vite 7, Tailwind CSS 4 on the devmade-ai fleet design-token layer,
 wouter, vite-plugin-pwa (Workbox). Pictures are stored in the browser's local
-storage; there is no server and no account. Deployed on Vercel.
+storage; there is no server and no account. Visits are counted with Google
+Analytics (GA4); pictures are never sent anywhere. Deployed on Vercel.
