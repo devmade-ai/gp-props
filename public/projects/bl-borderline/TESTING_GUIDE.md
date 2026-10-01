@@ -82,8 +82,9 @@ unless a scenario says otherwise.
 2. Tick **Capital city**: "5 places, 10 answers to find".
 3. Untick both topics: the line reads "Pick at least one thing to name." and
    **Play on your own** and **Play a friend** are both disabled.
-4. Both dropdowns show a grey ⌄ arrow about 14 px in from the right edge,
-   never touching it, in light and dark; a long choice ("Latin America and
+4. Both dropdowns show a ⌄ arrow in the text colour (dark in light mode,
+   light in dark mode) about 14 px in from the right edge, never touching
+   it; a long choice ("Latin America and
    the Caribbean") never runs under the arrow.
 
 ### 8. Playing
