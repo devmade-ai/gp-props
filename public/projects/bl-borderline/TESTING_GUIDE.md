@@ -394,6 +394,11 @@ step 5, which needs the deployed site.
    "A friend wants a game" and the invite card, and `/` still gives
    "Borderline" and the app card. Pasting a `/join#code` link into a
    messaging app shows the dark "A friend wants a game." card.
+6. The whole world with country names → **Play on your own**, scroll past
+   row 200 and type in a box there → **Submit** → **Submit**: the screen
+   opens at the top on the score, not partway down the results. The same
+   from a game with a friend once the score is sent (run 2026-10-01; before
+   the fix the score was 32,000 px above the screen in both).
 
 ## Regression checklist
 
