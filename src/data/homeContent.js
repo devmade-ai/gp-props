@@ -114,9 +114,9 @@ export const PROJECTS = [
   {
     slug: 'bl-borderline',
     title: 'Borderline',
-    badges: [{ label: 'Game', primary: true }, { label: 'On-device' }],
-    description: 'Countries-of-the-world game. Pick a region and what to name (flags, capitals, currencies, dialing codes and more), then fill in every answer you know. Works offline.',
-    tech: 'JavaScript · React · Vite · PWA',
+    badges: [{ label: 'Game', primary: true }, { label: 'PWA' }],
+    description: 'Countries-of-the-world game. Pick a region and what to name (flags, capitals, currencies, dialing codes and more), then fill in every answer you know: on your own and offline, or against a friend from one shared link.',
+    tech: 'JavaScript · React · Vite · Supabase · PWA',
     live: 'https://bl-borderline.vercel.app/',
   },
   {

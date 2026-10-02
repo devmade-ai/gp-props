@@ -2,7 +2,7 @@
 
 How to maintain the mirrored project docs on the gp-props portfolio site.
 
-**Last mirrored:** 2026-09-27
+**Last mirrored:** 2026-10-01
 
 ## Current Status
 
@@ -25,7 +25,7 @@ How to maintain the mirrored project docs on the gp-props portfolio site.
 | qi-invoice | private | Scrubbed | Yes | Scrubbed | **No** | README: removed setup commands, env vars, internal doc links; kept the design-decision notes, which are the interesting part at portfolio altitude. User Guide copied as-is (grepped first — it contains no commands, paths or env vars). Testing Guide: removed the automated-suite section, npm scripts and file paths, keeping the 16 manual scenarios. No TutorialModal in source. |
 | kl-website | private | Scrubbed | **No** | **No** | **No** | Mirrored without being recorded here — added 2026-08-03. Only a README is present; user guide, testing guide and tutorial were never mirrored. |
 | web-arch | private | Scrubbed | Yes | Yes | **No** | Branded "redline", a knowless sub-brand. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
-| bl-borderline | private | Scrubbed | Yes | Scrubbed | Yes | Added 2026-09-23. README: removed Getting Started (commands) and the internal data-doc link. User Guide copied as-is (no commands, paths or env vars). Testing Guide: removed local setup, server commands, npm checks, the automated-checks section and the alpha debug-pill scenario. Tutorial from `src/components/TutorialModal.jsx`. |
+| bl-borderline | private | Scrubbed | Scrubbed | Scrubbed | Yes | Added 2026-09-23; re-mirrored 2026-10-01 for everything since: Play a friend, Just name them, marked results, Google Analytics and the Borderline design system (`meta.json` description, tech, use cases and dataPrivacy, the home card and the README row updated to match; the card's "On-device" badge became "PWA", since games with friends use the server). README: removed Getting started (commands, generator scripts), the internal TODO and data-doc links, the private tool-till-tees repo link and version numbers. User Guide: removed one internal TODO link, otherwise as-is. Testing Guide: removed local setup, server and rebuild commands, local URLs, the automated-checks section, the alpha debug-pill scenario, the two build-and-verify checklist items, and backend internals (table, file and function names, request payloads, library names). Tutorial from `src/components/TutorialModal.jsx`. |
 | px-pixelart | private | Scrubbed | Yes | Scrubbed | Yes | Added 2026-09-25; re-mirrored 2026-09-26 twice: inserting rows and columns, black blank squares in dark mode, preset sizes and empty custom-size boxes; then the one-screen editor (colour controls above the grid, Paint / Pick and Insert / Delete below it); re-mirrored 2026-09-27 for Google Analytics (README stack line, testing scenarios 1 and 18; `meta.json` dataPrivacy updated to match). README: removed Getting started (commands). User Guide copied as-is (no commands, paths or env vars). Testing Guide: removed local setup, server commands, the storage-filling console snippet, local URLs, rebuild steps and the automated-checks section. Tutorial from `src/components/TutorialModal.jsx`. |
 | dm-website | private | Scrubbed | Yes | Yes | **No** | The devmade studio front-door site. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
 

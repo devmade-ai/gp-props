@@ -1,7 +1,7 @@
 {
   "name": "bl-borderline",
   "title": "Borderline",
-  "description": "A game that tests what you know about the countries of the world: pick a part of the world and what to name, then fill in every answer you know.",
+  "description": "A game that tests what you know about the countries of the world: pick a part of the world and what to name, then fill in every answer you know, on your own or against a friend.",
   "category": "user-facing",
   "badge": "Game",
   "status": "active",
@@ -12,20 +12,23 @@
     "React",
     "Vite",
     "Tailwind CSS",
+    "Supabase",
     "PWA"
   ],
-  "audience": "Anyone who wants to test what they know about the world's countries, on a phone or a computer, without an account.",
+  "audience": "Anyone who wants to test what they know about the world's countries, on a phone or a computer, alone or against a friend, without an account.",
   "useCases": [
     "Someone with ten minutes on a train picks Southern Africa and names every country from its flag, offline, because the app is installed",
     "A geography fan takes on the whole world with capitals ticked and chips away at all 250 places over a few days; the game is saved on the device between sessions",
     "A traveller about to visit South-Eastern Asia picks that subregion and tests themselves on currencies and dialing codes before the trip",
-    "A student revising for a test picks Europe with capitals and official-language counts, types what they know, submits, and uses the score to see how much is left to learn"
+    "A student revising for a test picks Europe with capitals and official-language counts, types what they know, submits, and uses the score to see how much is left to learn",
+    "Two friends in different cities race each other on Europe's capitals from one shared link, watch each other's progress live, chat while they play, and see both scores once both have submitted",
+    "A geography fan picks Africa, ticks “Just name them” and lists every country they can remember with no flags or clues, then sees which ones they missed"
   ],
   "dataPrivacy": {
-    "storage": "The game in progress and the app's settings are kept in the browser's local storage, on the device only.",
-    "authentication": "None. There are no accounts.",
-    "transmission": "Nothing a player types is sent anywhere. Once loaded, the app works with the network switched off.",
-    "thirdParty": "None at runtime. Country data from mledoze/countries (ODbL 1.0) and flag images from flag-icons (MIT) are built into the app."
+    "storage": "The game in progress, the app's settings and the answers typed in games with friends are kept in the browser's local storage, on the device only. Games with friends (the area and topics, each player's filled count, score and optional name, and the chat) are stored on Borderline's server.",
+    "authentication": "None. There are no accounts or sign-up; playing a friend gives the device an anonymous identity behind the scenes.",
+    "transmission": "Playing on your own sends nothing a player types, and works with the network switched off. Playing a friend sends the filled count, the final score, the optional name and chat messages; typed answers never leave the phone. Turning on game alerts sends the browser's push subscription. Visits are counted with Google Analytics.",
+    "thirdParty": "Google Analytics (GA4) counts visits and sets its own cookies. Supabase holds the data of games with friends. Web Push delivers game alerts, only when turned on. Country data from mledoze/countries (ODbL 1.0) and flag images from flag-icons (MIT) are built into the app."
   },
   "docs": {
     "readme": true,
