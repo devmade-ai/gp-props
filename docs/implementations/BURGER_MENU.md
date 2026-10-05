@@ -251,7 +251,14 @@ Traps Tab/Shift+Tab within a container and restores focus on deactivation. Used 
 ```javascript
 import { useEffect, useRef } from 'react'
 
-const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+// The first and last matches are the trap's wrap points, so every entry must
+// be something Tab can actually land on. A disabled form control or a hidden
+// input that ends the list is a wrap point focus never reaches: Tab from the
+// real last control escapes the container, and Shift+Tab from the first calls
+// focus() on a dead element and sticks (measured in Chromium). `:not([disabled])`
+// on every form control comes from sun-sea-o (2026-10-05); `summary` (natively
+// tabbable — a <details> disclosure inside the dialog) from gp-props.
+const FOCUSABLE = 'a[href], button:not([disabled]), summary, textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 export function useFocusTrap(containerRef, active) {
   const previousFocusRef = useRef(null)
