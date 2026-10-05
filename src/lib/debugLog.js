@@ -163,12 +163,23 @@ if (typeof window !== 'undefined' && !window.__debugLogListenersAttached) {
     debugAdd('global', 'warn', args.map(String).join(' '));
   };
 
+  // Capture phase, like the head partial's inline capture: a <script> that
+  // fails to load fires `error` at the element, which never reaches a bubbling
+  // window listener — and after the hand-off below this is the only listener
+  // left. Failed images and stylesheets are not app errors and are skipped.
   errorListener = (e) => {
+    const target = e.target;
+    if (target instanceof Element) {
+      if (target.tagName === 'SCRIPT') {
+        debugAdd('global', 'error', `Could not load ${target.src || 'a script'}`);
+      }
+      return;
+    }
     debugAdd('global', 'error', e.message || 'Unknown error', {
       filename: e.filename, lineno: e.lineno, colno: e.colno,
     });
   };
-  window.addEventListener('error', errorListener);
+  window.addEventListener('error', errorListener, true);
 
   rejectionListener = (e) => {
     debugAdd('global', 'error', `Unhandled rejection: ${e.reason}`);
@@ -195,7 +206,7 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     console.error = originalError;
     console.warn = originalWarn;
-    if (errorListener) window.removeEventListener('error', errorListener);
+    if (errorListener) window.removeEventListener('error', errorListener, true);
     if (rejectionListener) window.removeEventListener('unhandledrejection', rejectionListener);
     subscribers.clear();
     window.__debugPushError = null;

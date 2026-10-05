@@ -22,9 +22,14 @@ Delete an item when it is done — git history is the record.
   debug store's HMR guard plus an `import.meta.hot.dispose()` block
   (DEBUG_SYSTEM.md); a copy routine that reports only real success, with
   the manual-copy view, the inline-capture hand-off and an env() fallback
-  for the pill's bottom inset (DEBUG_SYSTEM.md); a top-layer
-  toast in any app whose modals use `<dialog showModal()>` (PWA_SYSTEM.md
-  Toast System); vite-plugin-pwa ≥1.3.0 wherever `onNeedReload` is passed.
+  for the pill's bottom inset (DEBUG_SYSTEM.md); the debug store's window
+  `error` listener in the capture phase, so a script that fails to load
+  after start-up is recorded (DEBUG_SYSTEM.md); the toast's live region on
+  an always-present visually hidden element, never on a container that hides
+  itself while empty, plus a region inside each modal dialog (PWA_SYSTEM.md
+  Toast System); a top-layer toast in any app whose modals use
+  `<dialog showModal()>` (PWA_SYSTEM.md Toast System); vite-plugin-pwa
+  ≥1.3.0 wherever `onNeedReload` is passed.
   Enumerate from the org and follow `docs/FLEET_CHANGES.md`.
 
 - [ ] **Check every repo's "Kept From Replaced Sections" for headless

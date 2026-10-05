@@ -159,7 +159,7 @@ function debugGetEnvironment() {
 //     neither.
 const originalError = console.error
 const originalWarn = console.warn
-let errorListener: ((e: ErrorEvent) => void) | null = null
+let errorListener: ((e: Event) => void) | null = null
 let rejectionListener: ((e: PromiseRejectionEvent) => void) | null = null
 
 if (!(window as any).__debugLogListenersAttached) {
@@ -175,14 +175,28 @@ if (!(window as any).__debugLogListenersAttached) {
     debugAdd('global', 'warn', args.map(String).join(' '))
   }
 
-  errorListener = (e) => {
+  // Capture phase, like the inline capture: a <script> that fails to load
+  // fires `error` at the element, and that event never reaches a bubbling
+  // window listener. After the hand-off below this listener is the only one
+  // left, so in the bubble phase a chunk a deploy removed would go unrecorded
+  // (sun-sea-o's debugLog.ts had this right first). Failed images and
+  // stylesheets are not app errors and are skipped.
+  errorListener = (event) => {
+    const target = event.target
+    if (target instanceof Element) {
+      if (target.tagName === 'SCRIPT') {
+        debugAdd('global', 'error', `Could not load ${(target as HTMLScriptElement).src || 'a script'}`)
+      }
+      return
+    }
+    const e = event as ErrorEvent
     debugAdd('global', 'error', e.message || 'Unknown error', {
       filename: e.filename,
       lineno: e.lineno,
       colno: e.colno,
     })
   }
-  window.addEventListener('error', errorListener)
+  window.addEventListener('error', errorListener, true)
 
   rejectionListener = (e) => {
     debugAdd('global', 'error', `Unhandled rejection: ${e.reason}`)
@@ -214,7 +228,7 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => {
     console.error = originalError
     console.warn = originalWarn
-    if (errorListener) window.removeEventListener('error', errorListener)
+    if (errorListener) window.removeEventListener('error', errorListener, true)
     if (rejectionListener) window.removeEventListener('unhandledrejection', rejectionListener)
     subscribers.clear()
     ;(window as any).__debugPushError = null

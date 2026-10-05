@@ -957,6 +957,12 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | null>(null)
 
+// The newest message, for screen-reader regions (the provider's own, and one
+// inside each open modal dialog — see "A modal speaks for the toast").
+interface ToastAnnouncement { id: number; message: string }
+const ToastAnnouncementContext = createContext<ToastAnnouncement | null>(null)
+export const useToastAnnouncement = () => useContext(ToastAnnouncementContext)
+
 let toastId = 0
 const nextToastId = () => { toastId = (toastId + 1) % Number.MAX_SAFE_INTEGER; return toastId }
 
@@ -968,21 +974,34 @@ export function useToast(): ToastContextType {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [announcement, setAnnouncement] = useState<ToastAnnouncement | null>(null)
 
   const addToast = useCallback((message: string, { type = 'info', duration = 3000 } = {}) => {
     const id = nextToastId()
     setToasts(prev => [...prev, { id, message, type, duration }])
+    setAnnouncement({ id, message })
     return id
   }, [])
 
   const removeToast = useCallback((id: number) => {
     setToasts(prev => prev.filter(t => t.id !== id))
+    // Cleared with its toast, so a modal opened later starts with an empty region.
+    setAnnouncement(a => (a?.id === id ? null : a))
   }, [])
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
-      {children}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ToastAnnouncementContext.Provider value={announcement}>
+        {children}
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
+        {/* THE live region: never hidden, never unmounted, so it is in the
+            accessibility tree before any message lands in it. Not on the
+            container — see ToastContainer. A keyed node per message, so the
+            same text twice is still a new addition and is read again. */}
+        <div className="sr-only" role="status" aria-live="polite">
+          {announcement && <span key={announcement.id}>{announcement.message}</span>}
+        </div>
+      </ToastAnnouncementContext.Provider>
     </ToastContext.Provider>
   )
 }
@@ -1026,10 +1045,14 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: number) =
   )
 }
 
-// The container is ALWAYS mounted and carries the single live region.
-// A live region inserted into the DOM together with its first message is
-// frequently not announced at all, and a per-toast live region inside it makes
-// screen readers double-speak. One always-present announcer, many toasts.
+// The container is visual only: the live region is the provider's sr-only
+// element. A live region inserted together with its first message is often
+// not announced, and this container cannot keep one ready — `empty:hidden`
+// and an unopened popover are both display:none, which takes an element out
+// of the accessibility tree (measured in Chromium: an empty
+// `:empty { display: none }` status element is absent from the tree, a
+// visually hidden one is present). No region per toast either: nested regions
+// double-speak.
 //
 // Requirement (apps with a native <dialog showModal()>): a toast raised while
 //   the dialog is open must be visible over it.
@@ -1060,8 +1083,9 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
   return (
     <div
       ref={ref}
-      role="status"
-      aria-live="polite"
+      // No role or aria-live here (see above). Not aria-hidden either: each
+      // toast carries a Dismiss button, and aria-hidden over a focusable
+      // control strands it.
       // inset-auto, bg-transparent and overflow-visible undo the UA popover
       // box (inset: 0, a Canvas background, overflow: auto). Without them the
       // container jumps to the TOP of the viewport on a white slab (measured).
@@ -1080,10 +1104,10 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
 - **Context-based** — `useToast()` accessible from any component without prop drilling. Wrap `<App>` in `<ToastProvider>`.
 - **Semantic theme colors** — if the app uses DaisyUI, `bg-success`/`bg-error` work across themes automatically; otherwise map these to the app's own status colors.
 - **iOS safe area** — `env(safe-area-inset-bottom)` prevents toasts from being hidden behind the home indicator on notched iPhones.
-- **One always-mounted live region** — never unmount the container when the list empties, and never put `role`/`aria-live` on individual toasts. Both break announcements (silence in the first case, double-speak in the second). `empty:hidden` + `pointer-events-none` keeps the always-present container invisible and click-through.
+- **One live region, apart from the toasts** — a visually hidden `role="status"` element in the provider, never hidden or unmounted, receiving each message as a keyed node. Not on the container: `empty:hidden` and an unopened popover are both `display: none`, which removes a region from the accessibility tree, so the first toast would arrive together with its region and often go unread. Not on individual toasts: nested regions double-speak. `empty:hidden` + `pointer-events-none` keep the visual container invisible and click-through. (Corrected 2026-10-05: this doc's earlier code put the region on the `empty:hidden` container; sun-sea-o's review caught the same flaw on its toast.)
 - **Stacking** — multiple toasts stack with `flex-col-reverse` (newest on top).
 - **Top layer, if the app opens native modal dialogs** — a `<dialog showModal()>` paints above every z-index, so a z-70 toast lands under it (and under its `::backdrop`, dimmed). The container above is therefore a `popover="manual"`, re-promoted on every change so it sits above whatever dialog opened last, with z-70 as the fallback where `showPopover` is missing. (Adopted from sun-sea-o's `Toast.tsx`, 2026-10-05; there, a modal's own error toasts rendered grey-on-grey behind the dialog.)
-- **A toast cannot speak for a modal** — while a modal dialog is open, everything outside it is inert, the promoted toast included. Measured in Chromium: it paints above the dialog, but its dismiss button takes no click or focus and it is absent from the accessibility tree, so a screen reader is not told. The popover makes the message *visible*; an error caused by an action inside a modal still belongs inside that modal, next to what caused it.
+- **A modal speaks for the toast** — while a modal dialog is open, everything outside it is inert: the promoted toast (it paints above the dialog, but its Dismiss button takes no click or focus) and the provider's live region, both absent from the accessibility tree (measured in Chromium). So each modal dialog renders its own visually hidden polite region with the same message: `const a = useToastAnnouncement()` and, inside the `<dialog>`, `<div className="sr-only" aria-live="polite">{a && <span key={a.id}>{a.message}</span>}</div>`. Only the topmost modal is not inert, so exactly one region speaks — the modal's while one is open, the provider's otherwise. Portaling the toast into the dialog instead is the trap: a toast raised as the modal closes ("Saved") unmounts with it. (Adopted from sun-sea-o's `lib/toastAnnouncer.ts` + `Modal`, 2026-10-05, where it was checked in Chromium's accessibility tree: one copy of the message, inside the modal's region.) An error caused by an action inside a modal is still better shown inside that modal, next to what caused it.
 - **Exit animation** — 200ms fade-out before DOM removal for visual polish.
 - **ID wraps at MAX_SAFE_INTEGER** — prevents overflow in long sessions.
 
