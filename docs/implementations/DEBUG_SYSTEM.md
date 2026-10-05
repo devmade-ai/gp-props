@@ -141,41 +141,70 @@ function debugGetEnvironment() {
   }
 }
 
-// --- Console interception ---
-// Captures React warnings, library errors, and any other console output automatically.
-// Must run at module load time to catch early console calls.
+// --- Console interception + global error capture ---
+// Installed at module load time — captures React warnings, library errors and
+// crashes before React mounts.
+// Requirement: survive hot reload without stacking or losing capture.
+// Approach: the console patches sit INSIDE the same HMR guard as the window
+//   listeners, and import.meta.hot.dispose() undoes all of it and clears the
+//   flag, so the re-evaluated module attaches to ITS OWN buffer.
+// Alternatives (measured over two Vite hot reloads, 2026-10-05):
+//   - Patching console outside the guard (this doc's earlier code): every
+//     reload wraps the previous wrapper, so one console.error ran debugAdd
+//     three times, once per module instance ever loaded — and the guarded
+//     window listeners kept writing to the FIRST instance, so a thrown error
+//     never reached the live pill.
+//   - Guard without dispose (sun-sea-o): no stacking, but console AND window
+//     capture both stay bound to the first instance — the live pill saw
+//     neither.
 const originalError = console.error
 const originalWarn = console.warn
+let errorListener: ((e: ErrorEvent) => void) | null = null
+let rejectionListener: ((e: PromiseRejectionEvent) => void) | null = null
 
-console.error = (...args: unknown[]) => {
-  originalError.apply(console, args)
-  debugAdd('global', 'error', args.map(String).join(' '))
-}
-
-console.warn = (...args: unknown[]) => {
-  originalWarn.apply(console, args)
-  debugAdd('global', 'warn', args.map(String).join(' '))
-}
-
-// --- Global error capture ---
-// Installed at module load time — captures crashes before React mounts.
-// HMR guard prevents duplicate listeners during development.
 if (!(window as any).__debugLogListenersAttached) {
   (window as any).__debugLogListenersAttached = true
 
-  window.addEventListener('error', (e) => {
+  console.error = (...args: unknown[]) => {
+    originalError.apply(console, args)
+    debugAdd('global', 'error', args.map(String).join(' '))
+  }
+
+  console.warn = (...args: unknown[]) => {
+    originalWarn.apply(console, args)
+    debugAdd('global', 'warn', args.map(String).join(' '))
+  }
+
+  errorListener = (e) => {
     debugAdd('global', 'error', e.message || 'Unknown error', {
       filename: e.filename,
       lineno: e.lineno,
       colno: e.colno,
     })
-  })
+  }
+  window.addEventListener('error', errorListener)
 
-  window.addEventListener('unhandledrejection', (e) => {
+  rejectionListener = (e) => {
     debugAdd('global', 'error', `Unhandled rejection: ${e.reason}`)
+  }
+  window.addEventListener('unhandledrejection', rejectionListener)
+}
+
+// Vite (or any bundler exposing import.meta.hot). Restores what the guard
+// patched and lowers the flag; the new module instance then attaches afresh.
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    console.error = originalError
+    console.warn = originalWarn
+    if (errorListener) window.removeEventListener('error', errorListener)
+    if (rejectionListener) window.removeEventListener('unhandledrejection', rejectionListener)
+    subscribers.clear()
+    ;(window as any).__debugLogListenersAttached = false
   })
 }
 ```
+
+The guard and the dispose block are one mechanism — keep both or the hot reload story breaks in one of the two ways above. gp-props' `src/lib/debugLog.js` is the reference.
 
 ## Clipboard Utilities
 
@@ -410,7 +439,7 @@ In `main.tsx`, call `window.__debugClearLoadTimer()` immediately after mount. Ro
 
 1. **Separate React root is essential** — the pill must survive App crashes. Mount it in `#debug-root`, not inside `<App>`.
 2. **Use inline styles, not Tailwind** — the pill renders in an isolated root where app CSS may not be loaded. Inline styles ensure the pill always renders correctly.
-3. **Console interception catches React warnings** — patching `console.error` and `console.warn` at module load time captures framework warnings and library errors without explicit logging calls.
+3. **Console interception catches React warnings** — patching `console.error` and `console.warn` at module load time captures framework warnings and library errors without explicit logging calls. Patch inside the HMR guard and undo it in `import.meta.hot.dispose()`: outside the guard every hot reload stacks another wrapper, and a guard with no dispose leaves all capture bound to the first module instance, invisible to the live pill.
 4. **Redact URLs in debug reports** — strip query params (`?[redacted]`) to prevent accidental token, UTM, or sensitive data leaking when users share reports.
 5. **Immediate subscriber delivery eliminates timing bugs** — new subscribers receive all current entries on subscribe, not just future ones. Without this, a late-subscribing UI component misses the boot sequence.
 6. **Structured `details` over plain strings** — `Record<string, unknown>` enables post-mortem filtering and analysis. Plain string concatenation loses structure.
