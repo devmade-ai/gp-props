@@ -939,7 +939,7 @@ Context-based toast notification system. Used for PWA events (offline ready, upd
 //   - Browser alert(): Rejected — blocks UI, jarring.
 //   - Third-party library (react-hot-toast): Rejected — adds dependency for simple feature.
 
-import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react'
+import { useState, useEffect, useRef, useCallback, createContext, useContext, type ReactNode } from 'react'
 
 type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -1030,12 +1030,44 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: number) =
 // A live region inserted into the DOM together with its first message is
 // frequently not announced at all, and a per-toast live region inside it makes
 // screen readers double-speak. One always-present announcer, many toasts.
+//
+// Requirement (apps with a native <dialog showModal()>): a toast raised while
+//   the dialog is open must be visible over it.
+// Approach: the container is a manual popover, re-promoted whenever the list
+//   changes. The top layer is a stack, newest promotion on top, so a container
+//   promoted before the dialog opened sits under it until hidePopover() +
+//   showPopover() moves it back to the top. "manual": the timers own a toast's
+//   lifetime; light dismiss would swallow it on the next tap.
+// Alternatives: a higher z-index — rejected, cannot work: the dialog is in the
+//   top layer, above every z-index (Z_INDEX_SCALE.md, The Top Layer).
+// Apps with no native modal dialog can drop the popover lines; z-[70] does it.
 function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    // Feature-check here, not at render: the attribute alone HIDES the element
+    // (UA sheet: [popover]:not(:popover-open) { display: none }), so it must
+    // never be set where showPopover() is missing (jsdom, older engines) —
+    // there the container stays a plain z-70 element. Setting it in the effect
+    // also keeps server-rendered markup identical to the client's.
+    if (!el || toasts.length === 0 || typeof el.showPopover !== 'function') return
+    el.popover = 'manual'
+    if (el.matches(':popover-open')) el.hidePopover()
+    el.showPopover()
+  }, [toasts])
+
   return (
     <div
+      ref={ref}
       role="status"
       aria-live="polite"
-      className="fixed left-1/2 -translate-x-1/2 z-[70] flex flex-col-reverse gap-2 max-w-sm w-full px-4 pointer-events-none empty:hidden"
+      // inset-auto, bg-transparent and overflow-visible undo the UA popover
+      // box (inset: 0, a Canvas background, overflow: auto). Without them the
+      // container jumps to the TOP of the viewport on a white slab (measured).
+      // Tailwind's preflight already zeroes the UA margin/border/padding;
+      // without preflight, reset those too.
+      className="fixed inset-auto left-1/2 -translate-x-1/2 z-[70] flex flex-col-reverse gap-2 max-w-sm w-full px-4 pointer-events-none empty:hidden bg-transparent overflow-visible"
       style={{ bottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))' }}
     >
       {toasts.map(toast => <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />)}
@@ -1050,6 +1082,8 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
 - **iOS safe area** — `env(safe-area-inset-bottom)` prevents toasts from being hidden behind the home indicator on notched iPhones.
 - **One always-mounted live region** — never unmount the container when the list empties, and never put `role`/`aria-live` on individual toasts. Both break announcements (silence in the first case, double-speak in the second). `empty:hidden` + `pointer-events-none` keeps the always-present container invisible and click-through.
 - **Stacking** — multiple toasts stack with `flex-col-reverse` (newest on top).
+- **Top layer, if the app opens native modal dialogs** — a `<dialog showModal()>` paints above every z-index, so a z-70 toast lands under it (and under its `::backdrop`, dimmed). The container above is therefore a `popover="manual"`, re-promoted on every change so it sits above whatever dialog opened last, with z-70 as the fallback where `showPopover` is missing. (Adopted from sun-sea-o's `Toast.tsx`, 2026-10-05; there, a modal's own error toasts rendered grey-on-grey behind the dialog.)
+- **A toast cannot speak for a modal** — while a modal dialog is open, everything outside it is inert, the promoted toast included. Measured in Chromium: it paints above the dialog, but its dismiss button takes no click or focus and it is absent from the accessibility tree, so a screen reader is not told. The popover makes the message *visible*; an error caused by an action inside a modal still belongs inside that modal, next to what caused it.
 - **Exit animation** — 200ms fade-out before DOM removal for visual polish.
 - **ID wraps at MAX_SAFE_INTEGER** — prevents overflow in long sessions.
 
@@ -1667,6 +1701,7 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 41. **Use semantic theme colors for toasts** — e.g. with DaisyUI, `bg-success`/`bg-error` work across themes. Avoid hardcoding fixed colors like `bg-brand-600`.
 42. **iOS safe areas on toasts/banners** — `env(safe-area-inset-bottom)` for bottom-pinned, `env(safe-area-inset-top)` for top-pinned.
 43. **One always-mounted live region for toasts** — unmounting it swallows the first announcement; per-toast live regions double-speak.
+43b. **A z-70 toast is invisible behind a native modal dialog** — `showModal()` is the top layer. Make the toast container a manual popover and re-promote it per toast so it paints above; it is still inert there (no clicks, not announced), so a modal's own errors go inside the modal.
 44. **Manifest `theme_color` must match the default-theme meta** — Android standalone prefers the manifest value over the meta tags.
 
 ### Non-Vite Projects

@@ -417,7 +417,13 @@ below 30.
   renders — sheet, confirm dialog, picker — must `createPortal` to
   `document.body`; only outside the canvas does the Z scale work as
   written. Shell-owned surfaces (drawers, tutorial) already mount outside
-  the canvas in the shell component and need nothing.
+  the canvas in the shell component and need nothing. **The exception is
+  the top layer:** a native `<dialog>` opened with `showModal()`, or a
+  shown `popover`, needs no portal — it escapes every stacking context,
+  containing block and overflow clip (measured: a modal dialog rendered
+  inside a transformed, `overflow: hidden`, z-0 fixed parent came out
+  centred and unclipped, Z_INDEX_SCALE.md "The Top Layer"). What it does
+  not escape is the rules under Modals below.
 - **The 30 layer is scrimless by construction.** It sits below the backdrop
   (40), so nothing at 30 ever owns a scrim — that is Rule 6 of the scale,
   made explicit by this baseline.
@@ -432,7 +438,8 @@ below 30.
   notes); the shell has no such constraint, and copying the deviation
   copies the exception without the reason.
 - **Toast position is separate from toast stacking.** z-70 says what paints
-  on top; on mobile the toast also offsets
+  on top — of the scale; over a native modal dialog it needs the top layer
+  (PWA_SYSTEM.md, Toast System). On mobile the toast also offsets
   `bottom: calc(var(--nav-height) + var(--safe-bottom) + 0.5rem)`
   so it clears the nav and the home indicator. Top-pinned banners mirror
   with `env(safe-area-inset-top)` (PWA_SYSTEM.md).
@@ -452,6 +459,37 @@ Two kinds — one size for everything was rejected:
 Both kinds: backdrop 40 + modal 60, focus trapped and restored, the shell
 behind marked `inert`, closed by Escape/Android back through the same
 history owner as every other overlay.
+
+**Native `<dialog showModal()>`** is a valid way to build either kind, and
+it changes which of those you write by hand. It is in the top layer: no
+z-60, no portal, and its `::backdrop` replaces the 40 backdrop element. The
+browser makes the rest of the document inert (HTML spec, "blocked by a
+modal dialog"), and an ancestor's `inert` attribute does not reach the
+dialog itself, so the store's shell-wide `inert` stays harmless. Three
+rules it does NOT take over:
+
+- **The history entry.** Escape and the Android back button are both
+  *close requests* (HTML spec; MDN `CloseWatcher`), and a modal dialog
+  answers them through its own close watcher before anything else — it
+  fires `cancel` then `close` and shuts itself, and when a close watcher
+  handled the request the back press is not treated as history
+  navigation. The entry the store pushed for the dialog is left behind,
+  so the next back press appears to do nothing. Desktop Escape stays on
+  the store's path only because `useEscapeKey` calls `preventDefault()` on
+  the keydown, which keeps the dialog open (measured, Chromium); Android
+  back sends no keydown. So: listen for the dialog's `close` event, and if
+  the store did not start that close, mark the surface closed and pop its
+  entry, ignoring the `popstate` that produces. Do not rely on
+  `preventDefault()` on `cancel` instead — the spec makes `cancel`
+  uncancelable when there has been no user activation since the last
+  close request.
+- **The body scroll lock.** `showModal()` does not lock page scroll — a
+  wheel over the backdrop scrolled the page (measured, Chromium). Register
+  the dialog with the store's refcounted lock like any other modal.
+- **Messages about the modal live inside it.** Everything outside the
+  dialog is inert, including a toast promoted above it: visible, but not
+  clickable and absent from the accessibility tree (PWA_SYSTEM.md, Toast
+  System). An error from an action in the modal is rendered in the modal.
 
 ## The Shell and the Keyboard
 
