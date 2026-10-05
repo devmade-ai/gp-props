@@ -550,7 +550,10 @@ for (const [name, vars] of Object.entries(themeObj)) {
   // Light themes: use --color-primary for status bar. Dark themes: use --color-base-100
   const colorKey = isDark ? '--color-base-100' : '--color-primary';
   const hex = oklchToHex(vars[colorKey] || '');
-  results[name] = { isDark, metaColor: hex || '#808080' };
+  // Fail, don't fall back: a grey default ships a wrong status bar that no
+  // check will ever flag (see rule 5 below).
+  if (!hex) throw new Error(`${name} ${colorKey} is not a convertible oklch() value: ${vars[colorKey]}`);
+  results[name] = { isDark, metaColor: hex };
 }
 
 // Generate outputs — update your theme catalog, meta tags, and flash prevention script
@@ -562,6 +565,17 @@ console.log(JSON.stringify(results, null, 2));
 2. **oklch → hex conversion** — at build time, no runtime dependency
 3. **Color selection** — light themes use `--color-primary`, dark themes use `--color-base-100`
 4. **Generate all outputs** — theme arrays, hex color maps, initial meta tag values, flash prevention script's color map
+5. **Fail loud on anything it cannot read or find** — every regex that locates a target block (and, in a verify mode, every value it compares) must be required to match, and an unconvertible colour must stop the run. A silent miss is the worst outcome a sync tool has: a `replace()` that matched nothing writes the file back unchanged and prints "Updated", and a drift check whose pattern matched nothing reports "no drift" while checking nothing. sun-sea-o's `scripts/generate-theme-meta.mjs` throws when a pattern matches nothing; gp-props' `scripts/generate-meta-colors.mjs` exits 1 through `mustReplace()` and on an unconvertible colour:
+
+```javascript
+function mustReplace(content, regex, replacement, label) {
+  if (!regex.test(content)) {
+    console.error(`FAILED: ${label} no longer matches its regex — the file format drifted; update the script.`);
+    process.exit(1);
+  }
+  return content.replace(regex, replacement);
+}
+```
 
 The script should update every file that contains theme lists or color maps so there is zero manual maintenance. Run it after DaisyUI version updates.
 
@@ -776,14 +790,21 @@ Set `app.json` `backgroundColor` to match the default dark theme. The native spl
 
 The `storage` event fires in other tabs (not the one that wrote), so there's no infinite loop. Without it, toggling dark mode in one tab leaves other tabs on the old theme until refresh.
 
+**Every listener below also matches `e.key === null`.** `localStorage.clear()` in another tab fires ONE `storage` event whose `key`, `oldValue` and `newValue` are all `null`, and no per-key events (measured in Chromium, 2026-10-05). A listener that only matches its own key names never learns those keys are gone, and the tab keeps a theme the user just cleared until it reloads. Treat `null` as "every key changed" and re-derive from storage — which now yields the same defaults a fresh visit gets. (Adopted from sun-sea-o's `src/utils/theme.ts`, 2026-10-05.) The same goes for a single removed key (`newValue === null`): fall back to the default rather than ignoring the event.
+
 ### Per-Mode Independent (Approach A)
 
 **Vanilla JS:**
 
 ```javascript
 window.addEventListener('storage', function (e) {
-  if (e.key === 'darkMode' || e.key === 'lightTheme' || e.key === 'darkTheme') {
-    var dark = safeStorageGet('darkMode') === 'true';
+  // null key = storage.clear() in another tab: every key changed at once.
+  if (e.key === null || e.key === 'darkMode' || e.key === 'lightTheme' || e.key === 'darkTheme') {
+    var stored = safeStorageGet('darkMode');
+    // Unset falls back to the OS, exactly like a first visit.
+    var dark = stored !== null
+      ? stored === 'true'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
     var theme = getStoredTheme(dark);
     applyTheme(dark, theme, true); // skipPersist — values already in storage
   }
@@ -795,16 +816,18 @@ window.addEventListener('storage', function (e) {
 ```javascript
 useEffect(() => {
   const handleStorage = (e) => {
-    if (e.key === 'darkMode') {
+    // null key = storage.clear() in another tab: every key changed at once,
+    // and e.newValue is null, so each branch below lands on its default.
+    const all = e.key === null
+    if (all || e.key === 'darkMode') {
       const newDark = e.newValue !== null
         ? e.newValue === 'true'
         : window.matchMedia('(prefers-color-scheme: dark)').matches
       setIsDark(newDark)
-    } else if (e.key === 'lightTheme' && e.newValue) {
-      setLightThemeState(validLightTheme(e.newValue))
-    } else if (e.key === 'darkTheme' && e.newValue) {
-      setDarkThemeState(validDarkTheme(e.newValue))
     }
+    // validLightTheme/validDarkTheme map null (removed key) to the default.
+    if (all || e.key === 'lightTheme') setLightThemeState(validLightTheme(e.newValue))
+    if (all || e.key === 'darkTheme') setDarkThemeState(validDarkTheme(e.newValue))
   }
   window.addEventListener('storage', handleStorage)
   return () => window.removeEventListener('storage', handleStorage)
@@ -817,8 +840,12 @@ useEffect(() => {
 
 ```javascript
 window.addEventListener('storage', function (e) {
-  if (e.key === 'darkMode' || e.key === 'themeCombo') {
-    var dark = safeStorageGet('darkMode') === 'true';
+  // null key = storage.clear() in another tab: every key changed at once.
+  if (e.key === null || e.key === 'darkMode' || e.key === 'themeCombo') {
+    var stored = safeStorageGet('darkMode');
+    var dark = stored !== null
+      ? stored === 'true'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
     var theme = getStoredTheme(dark); // resolves combo → DaisyUI theme name
     applyTheme(dark, theme, true);
   }
@@ -830,14 +857,16 @@ window.addEventListener('storage', function (e) {
 ```javascript
 useEffect(() => {
   const handleStorage = (e) => {
-    if (e.key === 'darkMode') {
+    // null key = storage.clear() in another tab: every key changed at once.
+    const all = e.key === null
+    if (all || e.key === 'darkMode') {
       const newDark = e.newValue !== null
         ? e.newValue === 'true'
         : window.matchMedia('(prefers-color-scheme: dark)').matches
       setIsDark(newDark)
-    } else if (e.key === 'themeCombo' && e.newValue) {
-      setComboId(validCombo(e.newValue))
     }
+    // validCombo maps null (removed key) to DEFAULT_COMBO.
+    if (all || e.key === 'themeCombo') setComboId(validCombo(e.newValue))
   }
   window.addEventListener('storage', handleStorage)
   return () => window.removeEventListener('storage', handleStorage)
@@ -852,13 +881,18 @@ For Expo apps using combos with Zustand, cross-tab sync updates the store direct
 useEffect(() => {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return;
   const handleStorage = (e: StorageEvent) => {
-    if (e.key === 'darkMode' && e.newValue !== null) {
-      try { useThemeStore.setState({ isDark: JSON.parse(e.newValue) }) } catch {}
-    }
-    if (e.key === 'themeCombo' && e.newValue !== null) {
+    // null key = storage.clear() in another tab; null newValue = a removed key.
+    // Either way the value is gone: fall back to the loader's empty-store
+    // defaults (isDark false, comboKey 'default').
+    if (e.key === null || e.key === 'darkMode') {
       try {
-        const parsed = JSON.parse(e.newValue);
-        if (comboIds.has(parsed)) useThemeStore.setState({ comboKey: parsed })
+        useThemeStore.setState({ isDark: e.newValue !== null ? JSON.parse(e.newValue) : false })
+      } catch {}
+    }
+    if (e.key === null || e.key === 'themeCombo') {
+      try {
+        const parsed = e.newValue !== null ? JSON.parse(e.newValue) : 'default';
+        if (e.newValue === null || comboIds.has(parsed)) useThemeStore.setState({ comboKey: parsed })
       } catch {}
     }
   };
@@ -1097,7 +1131,7 @@ Pairs with the [Download as PDF](DOWNLOAD_PDF.md) implementation.
 **Sync and preferences:**
 
 9. **System preference is a fallback, not an override.** Once the user toggles manually, their choice persists. Overriding a manual choice with OS preference changes is disorienting.
-10. **Cross-tab sync requires the `storage` event listener.** The `storage` event only fires in other tabs (not the one that wrote), so there is no infinite loop. Without it, toggling dark mode in one tab leaves other tabs on the old theme until refresh.
+10. **Cross-tab sync requires the `storage` event listener.** The `storage` event only fires in other tabs (not the one that wrote), so there is no infinite loop. Without it, toggling dark mode in one tab leaves other tabs on the old theme until refresh. Match `e.key === null` too: `storage.clear()` fires one event with a null key and no per-key events.
 11. **Extract `safeStorage` into a shared module.** `safeStorageGet`, `safeStorageSet`, `safeStorageRemove` in `src/utils/safeStorage.ts` — reused by theme hook, PWA install hook, debug system. Don't inline try/catch in every consumer.
 
 **Flash prevention:**

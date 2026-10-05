@@ -189,7 +189,7 @@ Both the `icon` and `badge` passed to `showNotification` are icon URL surfaces, 
 
 ## Favicon.ico Generation (Optional)
 
-For cross-browser compatibility (Windows taskbar pinning, older browsers), generate a `favicon.ico` from a 32x32 PNG. Two approaches — prefer the manual pack: it has no dependency, and its byte layout is what makes the tripwire below possible.
+For cross-browser compatibility (Windows taskbar pinning, older browsers), generate a `favicon.ico` holding **one image per size — 16, 32 and 48px**, each rasterized from the SVG. An ICO is a container of images; the reader picks the entry closest to the size it needs, so a 16px tab icon and a 48px shortcut each get a native raster instead of a rescaled 32px one. (Multi-size adopted from sun-sea-o's `scripts/generate-icons.mjs`, 2026-10-05.) Two approaches — prefer the manual pack: it has no dependency, and its byte layout is what makes the tripwire below possible.
 
 ## Verify generated images by their pixels, not their header
 
@@ -208,44 +208,63 @@ Two rules, whichever generator you use:
 const ico = readFileSync(join(IMAGES_DIR, 'favicon.ico'));
 assert.equal(ico.readUInt16LE(0), 0);  // reserved
 assert.equal(ico.readUInt16LE(2), 1);  // type: ICO
-assert.ok(ico.readUInt16LE(4) >= 1);   // at least one image
+const count = ico.readUInt16LE(4);
+assert.ok(count >= 1);                 // at least one image
+// Every directory entry must point inside the file. A hard-coded offset
+// (the single-image `22`) copied into a multi-image pack fails here.
+for (let i = 0; i < count; i++) {
+  const size = ico.readUInt32LE(6 + 16 * i + 8);
+  const offset = ico.readUInt32LE(6 + 16 * i + 12);
+  assert.ok(offset >= 6 + 16 * count && offset + size <= ico.length);
+}
 ```
 
-**With `png-to-ico` package:**
+**With `png-to-ico` package:** pass one buffer per size. Given a single image, png-to-ico (3.0.2) first resizes it to 256px and derives 48/32/16 from that — fed a 32px PNG, which this doc used to show, it wrote a 285 KB ICO whose 256 and 48px entries were upscaled from 32px (measured). The array form writes exactly the sizes you rendered (15 KB):
 
 ```javascript
 import pngToIco from 'png-to-ico';
 
-const favicon32 = await sharp(svgBuffer, { density: SVG_DENSITY })
-  .resize(32, 32).png().toBuffer();
-const icoBuffer = await pngToIco(favicon32);
+const ICO_SIZES = [16, 32, 48];
+const pngs = await Promise.all(ICO_SIZES.map((size) =>
+  sharp(svgBuffer, { density: SVG_DENSITY }).resize(size, size).png().toBuffer()));
+const icoBuffer = await pngToIco(pngs);
 writeFileSync(join(IMAGES_DIR, 'favicon.ico'), icoBuffer);
 ```
 
-**Manual ICO packing** (fl-farlume, kl-website) — zero dependencies, stable binary format:
+**Manual ICO packing** (fl-farlume, kl-website; multi-size from sun-sea-o) — zero dependencies, stable binary format, PNG payloads stored as-is:
 
 ```javascript
-const favicon32 = await sharp(svgBuffer, { density: SVG_DENSITY })
-  .resize(32, 32).png().toBuffer();
+const ICO_SIZES = [16, 32, 48];
+const pngs = await Promise.all(ICO_SIZES.map((size) =>
+  sharp(svgBuffer, { density: SVG_DENSITY }).resize(size, size).png().toBuffer()));
 
-// ICO format: 6-byte header + 16-byte directory entry + PNG data
+// ICO format: 6-byte header + N * 16-byte directory entries + N payloads.
 const header = Buffer.alloc(6);
-header.writeUInt16LE(0, 0);  // Reserved
-header.writeUInt16LE(1, 2);  // Type: ICO
-header.writeUInt16LE(1, 4);  // Number of images
+header.writeUInt16LE(0, 0);             // Reserved
+header.writeUInt16LE(1, 2);             // Type: ICO
+header.writeUInt16LE(pngs.length, 4);   // Number of images
 
-const entry = Buffer.alloc(16);
-entry.writeUInt8(32, 0);     // Width
-entry.writeUInt8(32, 1);     // Height
-entry.writeUInt8(0, 2);      // Color palette
-entry.writeUInt8(0, 3);      // Reserved
-entry.writeUInt16LE(1, 4);   // Color planes
-entry.writeUInt16LE(32, 6);  // Bits per pixel
-entry.writeUInt32LE(favicon32.length, 8);  // Image size
-entry.writeUInt32LE(22, 12); // Offset (6 + 16 = 22)
+// Each entry points at its own payload, so offsets RUN: the first payload
+// starts after the whole directory, each next one after the previous.
+// A fixed offset (22 = 6 + 16) is only right for a single image.
+let offset = 6 + 16 * pngs.length;
+const entries = pngs.map((png, i) => {
+  const size = ICO_SIZES[i];
+  const entry = Buffer.alloc(16);
+  entry.writeUInt8(size >= 256 ? 0 : size, 0);  // Width (0 means 256)
+  entry.writeUInt8(size >= 256 ? 0 : size, 1);  // Height (0 means 256)
+  entry.writeUInt8(0, 2);                       // Color palette
+  entry.writeUInt8(0, 3);                       // Reserved
+  entry.writeUInt16LE(1, 4);                    // Color planes
+  entry.writeUInt16LE(32, 6);                   // Bits per pixel
+  entry.writeUInt32LE(png.length, 8);           // Image size
+  entry.writeUInt32LE(offset, 12);              // Offset of this payload
+  offset += png.length;
+  return entry;
+});
 
 writeFileSync(join(IMAGES_DIR, 'favicon.ico'),
-  Buffer.concat([header, entry, favicon32]));
+  Buffer.concat([header, ...entries, ...pngs]));
 ```
 
 ## Expo / Metro Projects

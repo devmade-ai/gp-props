@@ -63,8 +63,11 @@ An app's styling arrives **only** as this token layer:
    data colors, and brand marks may stay literal. Everything that themes
    goes through tokens.
 2. **Utility classes are generated from the tokens** (Tailwind v4 builds
-   utilities from CSS variables directly). The utility layer is a
-   convenience view of the tokens, not a second vocabulary.
+   utilities from variables declared in `@theme`, by namespace — and
+   several canonical names below sit in a namespace that means something
+   else; see [Tailwind v4 Namespaces](#tailwind-v4-namespaces) before
+   wiring them in). The utility layer is a convenience view of the tokens,
+   not a second vocabulary.
 3. **No third-party themed component vocabulary sits between the design
    and the app.** A library that ships its own theme names and values
    makes the design pass fight the vocabulary instead of filling it.
@@ -178,6 +181,118 @@ app's theme source is then regenerated from the design system verbatim,
 with no translation table between the two vocabularies. One vocabulary,
 two publishers: the design system authors it, the app consumes it.
 
+## Tailwind v4 Namespaces
+
+Tailwind v4 reads its theme from CSS variables in **named namespaces**, and
+it ships defaults for most of them in `@layer theme` on `:root`. The
+complete list, taken from `tailwindcss/theme.css` (v4.3.3, 2026-10-05):
+
+| Namespace | What reads it | Tailwind's default keys |
+|---|---|---|
+| `--color-*` | every colour utility (`bg-`, `text-`, `border-`, `fill-`, …) | the palette: 26 hues `red` … `taupe` at `50` … `950`, plus `black`, `white` |
+| `--font-*` | `font-{name}` family | `sans`, `serif`, `mono` |
+| `--text-*` | `text-{size}` **font size**, with `--text-*--line-height` companions | `xs`, `sm`, `base`, `lg`, `xl`, `2xl` … `9xl` |
+| `--font-weight-*` | `font-{weight}` | `thin` … `black` |
+| `--tracking-*` | letter spacing | `tighter`, `tight`, `normal`, `wide`, `wider`, `widest` |
+| `--leading-*` | line height | `tight`, `snug`, `normal`, `relaxed`, `loose` |
+| `--breakpoint-*` | `sm:` … `2xl:` media variants (compiled to literal widths) | `sm`, `md`, `lg`, `xl`, `2xl` |
+| `--container-*` | `w-`, `min-w-`, `max-w-`, `basis-`, `columns-` sizes, and `@sm:`… container variants (compiled to literal widths) | `3xs`, `2xs`, `xs`, `sm`, `md`, `lg`, `xl`, `2xl` … `7xl` |
+| `--spacing` (+ `--spacing-*`) | every spacing utility, as multiples of the one unit | `--spacing: 0.25rem` |
+| `--radius-*` | `rounded-*` | `xs`, `sm`, `md`, `lg`, `xl`, `2xl`, `3xl`, `4xl` |
+| `--shadow-*` | `shadow-*` (value compiled in, not referenced) | `2xs`, `xs`, `sm`, `md`, `lg`, `xl`, `2xl` |
+| `--inset-shadow-*` | `inset-shadow-*` | `2xs`, `xs`, `sm` |
+| `--drop-shadow-*` | `drop-shadow-*` | `xs`, `sm`, `md`, `lg`, `xl`, `2xl` |
+| `--text-shadow-*` | `text-shadow-*` | `2xs`, `xs`, `sm`, `md`, `lg` |
+| `--blur-*` | `blur-*`, `backdrop-blur-*` | `xs` … `3xl` |
+| `--perspective-*` | `perspective-*` | `dramatic`, `near`, `normal`, `midrange`, `distant` |
+| `--aspect-*` | `aspect-*` | `video` |
+| `--ease-*` | `ease-*` | `in`, `out`, `in-out` |
+| `--animate-*` | `animate-*` | `spin`, `ping`, `pulse`, `bounce` |
+| `--default-*` | preflight / base defaults | transition duration and timing, font family and feature/variation settings, mono equivalents |
+
+`theme.css` also carries a deprecated `inline reference` block (`--blur`,
+`--shadow`, `--shadow-inner`, `--drop-shadow`, `--radius`,
+`--max-width-prose`) that emits no variables.
+
+Two ways a token meets this list, both silent. Every result below is read
+off Tailwind 4.3.3's compiled CSS; the ones marked *measured* were also
+rendered in Chromium:
+
+1. **An unlayered declaration overrides Tailwind's default of the same
+   name.** The starter block below sits outside any cascade layer, and
+   unlayered styles beat `@layer theme`. Most utilities compile to
+   `var(--name)`, so a shared name retunes the stock utility app-wide.
+   sun-sea-o's `--container-sm: 640px` made `max-w-sm` 640px (measured) —
+   while the `@sm:` container variant kept firing at Tailwind's 24rem
+   (measured), because breakpoints and container queries are compiled to
+   literal widths. One name, two sizes.
+2. **A token declared in `@theme` generates a utility of its namespace's
+   kind**, whatever the token means.
+
+What that does to the names in this contract:
+
+- **The text colour roles sit in the font-size namespace.**
+  `--text-strong`, `--text-body`, `--text-muted`, `--text-faint` and
+  `--text-on-accent` are colours inside `--text-*`. On `:root` Tailwind
+  ignores them (no utility, no harm). Declared in `@theme` — which rule 2
+  of The One Styling Interface invites — `text-strong` compiles to
+  `font-size: var(--text-strong)`: a colour as a font size, dropped as
+  invalid, and still no colour utility. **The fix is on the Tailwind side,
+  never a rename:** these are the names Claude Design design systems emit
+  (The Published Contract), so renaming them would put a translation table
+  back between the design and the app. Never declare a colour role in
+  `@theme`. Keep the roles on `:root` / `[data-theme]` and bridge them into
+  the colour namespace with `@theme inline`, naming each bridge **by the
+  class suffix it should produce** — never by the token's own name:
+
+  ```css
+  @theme inline {
+    --color-strong:       var(--text-strong);     /* text-strong     */
+    --color-muted:        var(--text-muted);      /* text-muted      */
+    --color-on-accent:    var(--text-on-accent);  /* text-on-accent  */
+    --color-hairline:     var(--border-hairline); /* border-hairline */
+    --color-surface-card: var(--surface-card);    /* bg-surface-card */
+  }
+  ```
+
+  `--color-text-strong` would work but yields `text-text-strong`. `inline`
+  makes each utility a `var()` reference resolved at runtime, so a
+  `[data-theme]` re-mapping still reaches it. Taken from fc-fanfare-chess
+  `main.css`, which ships the full set this way.
+- **`--container-*` layout widths share Tailwind's container namespace.**
+  Name per-surface widths with keys Tailwind does not define
+  (`--container-reading`, `--container-sidebar`): unlayered they override
+  nothing, and in `@theme` they produce `max-w-reading`. Never reuse a size
+  key (`3xs` … `7xl`) — that is the `max-w-sm` bug above.
+- **Same name, same meaning, different value — the starter retunes stock
+  utilities.** `--text-xs/sm/lg/xl/2xl/3xl`, `--radius-xs/sm/md/lg/xl`,
+  `--leading-tight/snug/normal/relaxed`, `--tracking-tight/normal/wide`,
+  `--ease-out`, `--ease-in-out` and `--font-mono` are all Tailwind default
+  names. With the starter loaded, `text-sm` renders 13px instead of 14px
+  (measured), `text-lg` 17px instead of 18px, `rounded-sm` 6px instead of
+  4px (measured) and `rounded-lg` 14px instead of 8px; `leading-tight`
+  drops from 1.25 to 1.1; `font-mono` (and, through preflight's
+  `--default-mono-font-family`, every `<code>`/`<pre>`) takes the starter
+  stack. That is the contract working — the tokens *are* the scale — but
+  it changes every stock utility already in the app at the moment the
+  block lands, so adopt it knowingly, not by surprise.
+- **Shadows are the exception that splits.** `--shadow-xs` … `--shadow-xl`
+  are Tailwind default names too, but Tailwind compiles shadow values into
+  `shadow-*` at build time instead of referencing the variable. Unlayered,
+  the starter does not reach `shadow-sm` (measured: Tailwind's stock
+  shadow), while `box-shadow: var(--shadow-sm)` gets the token — two
+  different "sm" shadows in one app. Declared in `@theme`, the utilities
+  take the token's value, but still compiled in, so a `[data-theme]`
+  redefinition (Theming: elevation belongs to the theme) never reaches
+  them. Consume theme-able shadows as `shadow-(--shadow-md)` or
+  `box-shadow: var(--shadow-md)`, both of which stay `var()` references.
+- **No collision:** `--surface-*`, `--border-*`, `--accent*`, the status
+  roles, `--ring`, `--focus-ring`, `--space-*`, `--stroke-*`, `--weight-*`
+  and `--dur-*` are in no Tailwind namespace — they reach utilities only
+  through a bridge. `--font-ui` and `--font-display` are in `--font-*` with
+  no default to collide with; in `@theme` they give `font-ui` /
+  `font-display`, which is what they mean.
+
 ## Starter Tokens
 
 A new app copies this once, before any design exists, and builds every
@@ -188,7 +303,10 @@ starter ships before the design and a real app runs on it until then.
 `--text-faint` was `#9c9ca3` (2.6:1 on the page) and `--border-strong`
 `#c9c9c2` (1.6:1) until 2026-09-23, when bl-borderline adopted the set and
 measured them; the values below are the measured fix, the same one
-fc-fanfare-chess made in its own design values:
+fc-fanfare-chess made in its own design values. In a Tailwind v4 app this
+block retunes Tailwind's stock type, radius, leading, tracking, easing and
+mono utilities — read [Tailwind v4 Namespaces](#tailwind-v4-namespaces)
+first:
 
 ```css
 :root {
@@ -288,7 +406,11 @@ its `[data-theme]` blocks replace whatever was here.
    theme it meets.
 3. **Vocabulary collisions are silent.** Width tokens named `--border-*`
    collide with the border *color* roles; the stroke/border split exists
-   because two surveyed systems had to invent it after the fact.
+   because two surveyed systems had to invent it after the fact. Tailwind
+   v4's namespaces are the other collision surface: sun-sea-o's
+   `--container-sm` silently resized `max-w-sm`, and this contract's own
+   `--text-*` colour roles become font sizes the moment they enter
+   `@theme`.
 4. **The machine voice is load-bearing.** All six systems reserve a
    distinct treatment for system-spoken text; apps that skip it end up
    hand-picking mono styles per component.

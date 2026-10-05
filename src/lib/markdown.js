@@ -163,16 +163,30 @@ export async function clipboardWrite(text) {
     return true;
   } catch { /* fall through */ }
 
+  // Last resort: hidden textarea + execCommand. Its own result is returned —
+  // false when the browser refuses — so no caller ever says "Copied!" for a
+  // copy that didn't happen. finally: the textarea is removed even when
+  // execCommand throws (it used to stay in the page), and focus goes back to
+  // the Copy button, because removing the focused textarea drops focus to
+  // <body> (measured in Chromium). readonly keeps the on-screen keyboard shut;
+  // 16px is the fleet's input rule (iOS Safari zooms on smaller text).
+  // No open-dialog host as in DEBUG_SYSTEM.md: this repo has no native modal
+  // <dialog>, so <body> is never inert here.
+  const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.setAttribute('aria-hidden', 'true');
+  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;font-size:16px';
   try {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
     document.body.appendChild(ta);
     ta.select();
-    const ok = document.execCommand('copy');
-    document.body.removeChild(ta);
-    return ok;
+    ta.setSelectionRange(0, text.length);
+    return document.execCommand('copy');
   } catch {
     return false;
+  } finally {
+    ta.remove();
+    previouslyFocused?.focus({ preventScroll: true });
   }
 }

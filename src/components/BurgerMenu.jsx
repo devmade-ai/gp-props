@@ -49,11 +49,13 @@ export function BurgerMenu({ items, id, version }) {
   useEscapeKey(open, close);
 
   // Requirement: prevent body scroll while the menu is open. overscroll-contain
-  // alone only stops chaining on scroll containers — taps on non-scrollable
-  // menu areas still chain to the body without the lock. scrollbar-gutter
-  // keeps the layout from shifting when the scrollbar hides. Deliberate
-  // deviation from the pattern's overscroll-only guidance; single writer,
-  // restored on close/unmount.
+  // only stops chaining while the card actually overflows — measured in
+  // Chromium, a capped card whose items fit and the backdrop both scroll the
+  // page without the lock. scrollbar-gutter keeps the layout from shifting
+  // when the scrollbar hides. Deliberate deviation from the pattern's
+  // overscroll-only default (BURGER_MENU.md Key Lesson 5 allows a lock with
+  // one owner): this is the ONLY writer of body styles in the repo, so the
+  // two-writer race that lesson names cannot occur. Restored on close/unmount.
   useEffect(() => {
     if (!open) return;
     document.body.style.scrollbarGutter = 'stable';
@@ -153,19 +155,40 @@ export function BurgerMenu({ items, id, version }) {
               backdrop tier (40): the menu lives inside the navbar's z-30
               stacking context, so a body-level backdrop above 30 would cover
               the menu itself. cursor-pointer is required for iOS Safari —
-              empty divs don't receive click events without it. */}
+              empty divs don't receive click events without it. A backdrop
+              element rather than a document click listener: the listener
+              would leave the page live, so the dismissing tap would also
+              follow whatever link it landed on. */}
           {createPortal(
             <div className="fixed inset-0 z-20 cursor-pointer" onClick={close} />,
             document.body,
           )}
 
+          {/* Requirement: every item reachable on a landscape phone.
+              Approach: cap the card at the room under the navbar —
+              100dvh minus 5rem (the 4rem navbar, the mt-2 offset and a
+              0.5rem gap) — and let it scroll. Measured at 740×360 before
+              this cap: the card (theme picker included) ended 362px below
+              the window, and with the navbar sticky and the body locked
+              nothing could bring "Save as PDF" and the rows above it into
+              view (BURGER_MENU.md, height cap).
+              Alternatives:
+                - The pattern's min(70dvh, 32rem): rejected here — this menu
+                  is ~660px tall, so the 32rem ceiling made it scroll on a
+                  1280×900 desktop it fits on.
+                - overflow-hidden: rejected — clips the same rows silently.
+                - Dropping the body lock so the page could scroll: rejected —
+                  the menu hangs off the sticky navbar, so page scroll never
+                  moves it.
+              No --app-height here: this site publishes none, so dvh is the
+              only viewport measure available. */}
           <nav
             ref={menuRef}
             id={menuId}
             aria-label="Main navigation"
             className="absolute right-0 top-full mt-2 z-dropdown w-56 max-w-[calc(100vw-2rem)]
               rounded-xl shadow-lg bg-base-100 border border-base-300
-              py-1 overscroll-contain origin-top-right"
+              py-1 max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain origin-top-right"
             onKeyDown={handleMenuKeyDown}
           >
             <ul className="list-none m-0 p-0 flex flex-col">

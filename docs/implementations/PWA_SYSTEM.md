@@ -12,7 +12,7 @@ order: 1
 
 # PWA System
 
-Four parts, built on `vite-plugin-pwa` (^1.2.0) with React. Adapt patterns for other frameworks — see "Framework variants" below for the Vue form and the SSR/SSG form.
+Four parts, built on `vite-plugin-pwa` (^1.3.0 — the first release whose register options accept `onNeedReload`; everything else here also runs on 1.2.x) with React. Adapt patterns for other frameworks — see "Framework variants" below for the Vue form and the SSR/SSG form.
 
 **Reference implementations:** gp-props (React 19 MPA, framework-agnostic singleton + React bridge), kl-website and qi-invoice (React SPA, singleton + `useSyncExternalStore`), fl-farlume (Vue 3, module-scope `useRegisterSW`).
 
@@ -330,7 +330,7 @@ B is the more precise form: `r.waiting` present at first registration *is* the l
 
 **Do not read anything into `updateServiceWorker(true)`'s argument — it has been inert since vite-plugin-pwa 0.13.2.** The shipped client is `async (_reloadPage = true) => { await registerPromise; if (!auto) sendSkipWaitingMessage?.() }`; the plugin's own type declarations say so. Calling it and posting `SKIP_WAITING` yourself are the same operation, so the invariant applies identically to both.
 
-**The plugin also installs its own unconditional reload, and your latch cannot veto it.** That same `'waiting'` handler runs `wb.addEventListener('controlling', e => { if (e.isUpdate) { onNeedReload ? onNeedReload() : window.location.reload() } })`. Your `controllerchange` guard gates *your* reload; this one fires regardless. So after a user taps "Later", any subsequent controller change — another tab applying the update, an external `skipWaiting` — reloads this tab over their unsaved work, which is exactly what policy step 2 promises won't happen. **If step 2's guarantee matters to your app, pass `onNeedReload` to `useRegisterSW` and route the decision through your own latch.**
+**The plugin also installs its own unconditional reload, and your latch cannot veto it.** That same `'waiting'` handler runs `wb.addEventListener('controlling', e => { if (e.isUpdate) { onNeedReload ? onNeedReload() : window.location.reload() } })`. Your `controllerchange` guard gates *your* reload; this one fires regardless. So after a user taps "Later", any subsequent controller change — another tab applying the update, an external `skipWaiting` — reloads this tab over their unsaved work, which is exactly what policy step 2 promises won't happen. **If step 2's guarantee matters to your app, pass `onNeedReload` to `useRegisterSW` and route the decision through your own latch.** That option first exists in **vite-plugin-pwa 1.3.0** (checked against the published 1.2.0 and 1.3.0 packages, 2026-10-05): 1.2.0's `controlling` handler is a bare `if (event.isUpdate) window.location.reload()`, its types have no `onNeedReload`, and the option is silently ignored. A `^1.2.0` range resolves to 1.3.x on a fresh install, but a lockfile pinned at 1.2.x keeps the unconditional reload — check the installed version (`npm ls vite-plugin-pwa`) before relying on it.
 
 **Related echo:** workbox-window also fires `onNeedRefresh` for a worker that was already waiting before `register()` (`wasWaitingBeforeRegister`). That can land before your registration handler runs and arm the banner for a frame before the launch-apply reload; clearing `_hasUpdate` inside the launch-apply branch (above) covers it. When the preference is OFF, arm the banner explicitly rather than relying on the echo.
 
@@ -939,7 +939,7 @@ Context-based toast notification system. Used for PWA events (offline ready, upd
 //   - Browser alert(): Rejected — blocks UI, jarring.
 //   - Third-party library (react-hot-toast): Rejected — adds dependency for simple feature.
 
-import { useState, useEffect, useCallback, createContext, useContext, type ReactNode } from 'react'
+import { useState, useEffect, useRef, useCallback, createContext, useContext, type ReactNode } from 'react'
 
 type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -957,6 +957,12 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | null>(null)
 
+// The newest message, for screen-reader regions (the provider's own, and one
+// inside each open modal dialog — see "A modal speaks for the toast").
+interface ToastAnnouncement { id: number; message: string }
+const ToastAnnouncementContext = createContext<ToastAnnouncement | null>(null)
+export const useToastAnnouncement = () => useContext(ToastAnnouncementContext)
+
 let toastId = 0
 const nextToastId = () => { toastId = (toastId + 1) % Number.MAX_SAFE_INTEGER; return toastId }
 
@@ -968,21 +974,34 @@ export function useToast(): ToastContextType {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [announcement, setAnnouncement] = useState<ToastAnnouncement | null>(null)
 
   const addToast = useCallback((message: string, { type = 'info', duration = 3000 } = {}) => {
     const id = nextToastId()
     setToasts(prev => [...prev, { id, message, type, duration }])
+    setAnnouncement({ id, message })
     return id
   }, [])
 
   const removeToast = useCallback((id: number) => {
     setToasts(prev => prev.filter(t => t.id !== id))
+    // Cleared with its toast, so a modal opened later starts with an empty region.
+    setAnnouncement(a => (a?.id === id ? null : a))
   }, [])
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
-      {children}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ToastAnnouncementContext.Provider value={announcement}>
+        {children}
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
+        {/* THE live region: never hidden, never unmounted, so it is in the
+            accessibility tree before any message lands in it. Not on the
+            container — see ToastContainer. A keyed node per message, so the
+            same text twice is still a new addition and is read again. */}
+        <div className="sr-only" role="status" aria-live="polite">
+          {announcement && <span key={announcement.id}>{announcement.message}</span>}
+        </div>
+      </ToastAnnouncementContext.Provider>
     </ToastContext.Provider>
   )
 }
@@ -1026,16 +1045,53 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: number) =
   )
 }
 
-// The container is ALWAYS mounted and carries the single live region.
-// A live region inserted into the DOM together with its first message is
-// frequently not announced at all, and a per-toast live region inside it makes
-// screen readers double-speak. One always-present announcer, many toasts.
+// The container is visual only: the live region is the provider's sr-only
+// element. A live region inserted together with its first message is often
+// not announced, and this container cannot keep one ready — `empty:hidden`
+// and an unopened popover are both display:none, which takes an element out
+// of the accessibility tree (measured in Chromium: an empty
+// `:empty { display: none }` status element is absent from the tree, a
+// visually hidden one is present). No region per toast either: nested regions
+// double-speak.
+//
+// Requirement (apps with a native <dialog showModal()>): a toast raised while
+//   the dialog is open must be visible over it.
+// Approach: the container is a manual popover, re-promoted whenever the list
+//   changes. The top layer is a stack, newest promotion on top, so a container
+//   promoted before the dialog opened sits under it until hidePopover() +
+//   showPopover() moves it back to the top. "manual": the timers own a toast's
+//   lifetime; light dismiss would swallow it on the next tap.
+// Alternatives: a higher z-index — rejected, cannot work: the dialog is in the
+//   top layer, above every z-index (Z_INDEX_SCALE.md, The Top Layer).
+// Apps with no native modal dialog can drop the popover lines; z-[70] does it.
 function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    // Feature-check here, not at render: the attribute alone HIDES the element
+    // (UA sheet: [popover]:not(:popover-open) { display: none }), so it must
+    // never be set where showPopover() is missing (jsdom, older engines) —
+    // there the container stays a plain z-70 element. Setting it in the effect
+    // also keeps server-rendered markup identical to the client's.
+    if (!el || toasts.length === 0 || typeof el.showPopover !== 'function') return
+    el.popover = 'manual'
+    if (el.matches(':popover-open')) el.hidePopover()
+    el.showPopover()
+  }, [toasts])
+
   return (
     <div
-      role="status"
-      aria-live="polite"
-      className="fixed left-1/2 -translate-x-1/2 z-[70] flex flex-col-reverse gap-2 max-w-sm w-full px-4 pointer-events-none empty:hidden"
+      ref={ref}
+      // No role or aria-live here (see above). Not aria-hidden either: each
+      // toast carries a Dismiss button, and aria-hidden over a focusable
+      // control strands it.
+      // inset-auto, bg-transparent and overflow-visible undo the UA popover
+      // box (inset: 0, a Canvas background, overflow: auto). Without them the
+      // container jumps to the TOP of the viewport on a white slab (measured).
+      // Tailwind's preflight already zeroes the UA margin/border/padding;
+      // without preflight, reset those too.
+      className="fixed inset-auto left-1/2 -translate-x-1/2 z-[70] flex flex-col-reverse gap-2 max-w-sm w-full px-4 pointer-events-none empty:hidden bg-transparent overflow-visible"
       style={{ bottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))' }}
     >
       {toasts.map(toast => <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />)}
@@ -1048,8 +1104,10 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
 - **Context-based** — `useToast()` accessible from any component without prop drilling. Wrap `<App>` in `<ToastProvider>`.
 - **Semantic theme colors** — if the app uses DaisyUI, `bg-success`/`bg-error` work across themes automatically; otherwise map these to the app's own status colors.
 - **iOS safe area** — `env(safe-area-inset-bottom)` prevents toasts from being hidden behind the home indicator on notched iPhones.
-- **One always-mounted live region** — never unmount the container when the list empties, and never put `role`/`aria-live` on individual toasts. Both break announcements (silence in the first case, double-speak in the second). `empty:hidden` + `pointer-events-none` keeps the always-present container invisible and click-through.
+- **One live region, apart from the toasts** — a visually hidden `role="status"` element in the provider, never hidden or unmounted, receiving each message as a keyed node. Not on the container: `empty:hidden` and an unopened popover are both `display: none`, which removes a region from the accessibility tree, so the first toast would arrive together with its region and often go unread. Not on individual toasts: nested regions double-speak. `empty:hidden` + `pointer-events-none` keep the visual container invisible and click-through. (Corrected 2026-10-05: this doc's earlier code put the region on the `empty:hidden` container; sun-sea-o's review caught the same flaw on its toast.)
 - **Stacking** — multiple toasts stack with `flex-col-reverse` (newest on top).
+- **Top layer, if the app opens native modal dialogs** — a `<dialog showModal()>` paints above every z-index, so a z-70 toast lands under it (and under its `::backdrop`, dimmed). The container above is therefore a `popover="manual"`, re-promoted on every change so it sits above whatever dialog opened last, with z-70 as the fallback where `showPopover` is missing. (Adopted from sun-sea-o's `Toast.tsx`, 2026-10-05; there, a modal's own error toasts rendered grey-on-grey behind the dialog.)
+- **A modal speaks for the toast** — while a modal dialog is open, everything outside it is inert: the promoted toast (it paints above the dialog, but its Dismiss button takes no click or focus) and the provider's live region, both absent from the accessibility tree (measured in Chromium). So each modal dialog renders its own visually hidden polite region with the same message: `const a = useToastAnnouncement()` and, inside the `<dialog>`, `<div className="sr-only" aria-live="polite">{a && <span key={a.id}>{a.message}</span>}</div>`. Only the topmost modal is not inert, so exactly one region speaks — the modal's while one is open, the provider's otherwise. Portaling the toast into the dialog instead is the trap: a toast raised as the modal closes ("Saved") unmounts with it. (Adopted from sun-sea-o's `lib/toastAnnouncer.ts` + `Modal`, 2026-10-05, where it was checked in Chromium's accessibility tree: one copy of the message, inside the modal's region.) An error caused by an action inside a modal is still better shown inside that modal, next to what caused it.
 - **Exit animation** — 200ms fade-out before DOM removal for visual polish.
 - **ID wraps at MAX_SAFE_INTEGER** — prevents overflow in long sessions.
 
@@ -1465,7 +1523,7 @@ Generate `version.json` at build time with `{ "buildTime": "2026-04-06T12:00:00Z
 
 The PWA layer is testable, and the riskiest behavior in it — launch-apply, an *unwanted reload* — is exactly what you want pinned. Two obstacles, both solved:
 
-**0. You may not need any of this.** If the policy lives in a plain module that imports no virtual module — the shape recommended above — you can test it directly with a storage shim and no mocking infrastructure at all. sun-sea-o pins 40 policy cases that way. The alias below is only needed to test the *hook*.
+**0. You may not need any of this.** If the policy lives in a plain module that imports no virtual module — the shape recommended above — you can test it directly with a storage shim and no mocking infrastructure at all. sun-sea-o pins 35 policy cases that way (`src/__tests__/pwaSingleton.test.ts`). The alias below is only needed to test the *hook*.
 
 One trap when the policy module is a singleton: **ESM hoisting evaluates it before `beforeAll` installs your shims**, so a singleton that reads storage at module init (which the preference pattern does) must tolerate storage-less init and re-derive that state in its reset helper.
 
@@ -1603,7 +1661,7 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 
 **`apple-touch-startup-image` needs real splash images:** it takes exact device-sized images selected by media queries. Pointing it at a 180px touch icon (a common copy-paste) is ignored or mis-rendered — omit it unless you generate the full set.
 
-**Expo Web incompatibility:** vite-plugin-pwa is not compatible with Expo Web (Expo Router uses Metro, not Vite). For Expo Web PWAs, use `workbox-cli generateSW` as a post-build step and manually wire up SW registration and update detection.
+**Expo Web incompatibility:** vite-plugin-pwa is not compatible with Expo Web (Expo Router uses Metro, not Vite). For Expo Web PWAs, hand-write the service worker and wire up SW registration and update detection yourself — see "Custom Service Worker (Non-Vite Projects)", which explains why `workbox-cli generateSW` is not the route.
 
 ## Key Lessons
 
@@ -1653,7 +1711,7 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 36. **`navigateFallback` names the app shell** — it fires on every navigation regardless of connectivity, it defaults to `'index.html'` so MPAs must pass `null` rather than omit it, and the URL must be in the precache manifest or the worker throws on evaluation and never installs.
 36b. **`navigateFallbackDenylist` for anything same-origin served from outside the build** — API routes, edge-generated files. Otherwise a direct navigation to them returns the app shell.
 36c. **`registerSW`/`useRegisterSW` exactly once per app** — a state singleton does not dedupe registration, and the hook form registers once per consumer.
-36d. **`updateServiceWorker(true)`'s argument is inert**; the plugin installs its own unconditional reload on `controlling`. Pass `onNeedReload` if "never reload mid-session" has to be a real guarantee.
+36d. **`updateServiceWorker(true)`'s argument is inert**; the plugin installs its own unconditional reload on `controlling`. Pass `onNeedReload` if "never reload mid-session" has to be a real guarantee — and have vite-plugin-pwa ≥1.3.0 installed, because 1.2.x ignores the option.
 36e. **`registration.update()` can hang forever** — bound it and read the verdict off the registration, or one hang plus in-flight sharing wedges the check for the session.
 36f. **Never runtime-cache a credentialed endpoint** — the cache key is the URL, so one user's response is served to the next; and sign-out does not clear Cache Storage.
 36g. **Opaque responses are one-way poison** — `[0, 200]` only for resources you never read back.
@@ -1667,6 +1725,7 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 41. **Use semantic theme colors for toasts** — e.g. with DaisyUI, `bg-success`/`bg-error` work across themes. Avoid hardcoding fixed colors like `bg-brand-600`.
 42. **iOS safe areas on toasts/banners** — `env(safe-area-inset-bottom)` for bottom-pinned, `env(safe-area-inset-top)` for top-pinned.
 43. **One always-mounted live region for toasts** — unmounting it swallows the first announcement; per-toast live regions double-speak.
+43b. **A z-70 toast is invisible behind a native modal dialog** — `showModal()` is the top layer. Make the toast container a manual popover and re-promote it per toast so it paints above; it is still inert there (no clicks, not announced), so a modal's own errors go inside the modal.
 44. **Manifest `theme_color` must match the default-theme meta** — Android standalone prefers the manifest value over the meta tags.
 
 ### Non-Vite Projects

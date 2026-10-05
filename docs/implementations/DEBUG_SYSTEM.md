@@ -141,76 +141,176 @@ function debugGetEnvironment() {
   }
 }
 
-// --- Console interception ---
-// Captures React warnings, library errors, and any other console output automatically.
-// Must run at module load time to catch early console calls.
+// --- Console interception + global error capture ---
+// Installed at module load time — captures React warnings, library errors and
+// crashes before React mounts.
+// Requirement: survive hot reload without stacking or losing capture.
+// Approach: the console patches sit INSIDE the same HMR guard as the window
+//   listeners, and import.meta.hot.dispose() undoes all of it and clears the
+//   flag, so the re-evaluated module attaches to ITS OWN buffer.
+// Alternatives (measured over two Vite hot reloads, 2026-10-05):
+//   - Patching console outside the guard (this doc's earlier code): every
+//     reload wraps the previous wrapper, so one console.error ran debugAdd
+//     three times, once per module instance ever loaded — and the guarded
+//     window listeners kept writing to the FIRST instance, so a thrown error
+//     never reached the live pill.
+//   - Guard without dispose (sun-sea-o): no stacking, but console AND window
+//     capture both stay bound to the first instance — the live pill saw
+//     neither.
 const originalError = console.error
 const originalWarn = console.warn
+let errorListener: ((e: Event) => void) | null = null
+let rejectionListener: ((e: PromiseRejectionEvent) => void) | null = null
 
-console.error = (...args: unknown[]) => {
-  originalError.apply(console, args)
-  debugAdd('global', 'error', args.map(String).join(' '))
-}
-
-console.warn = (...args: unknown[]) => {
-  originalWarn.apply(console, args)
-  debugAdd('global', 'warn', args.map(String).join(' '))
-}
-
-// --- Global error capture ---
-// Installed at module load time — captures crashes before React mounts.
-// HMR guard prevents duplicate listeners during development.
 if (!(window as any).__debugLogListenersAttached) {
   (window as any).__debugLogListenersAttached = true
 
-  window.addEventListener('error', (e) => {
+  console.error = (...args: unknown[]) => {
+    originalError.apply(console, args)
+    debugAdd('global', 'error', args.map(String).join(' '))
+  }
+
+  console.warn = (...args: unknown[]) => {
+    originalWarn.apply(console, args)
+    debugAdd('global', 'warn', args.map(String).join(' '))
+  }
+
+  // Capture phase, like the inline capture: a <script> that fails to load
+  // fires `error` at the element, and that event never reaches a bubbling
+  // window listener. After the hand-off below this listener is the only one
+  // left, so in the bubble phase a chunk a deploy removed would go unrecorded
+  // (sun-sea-o's debugLog.ts had this right first). Failed images and
+  // stylesheets are not app errors and are skipped.
+  errorListener = (event) => {
+    const target = event.target
+    if (target instanceof Element) {
+      if (target.tagName === 'SCRIPT') {
+        debugAdd('global', 'error', `Could not load ${(target as HTMLScriptElement).src || 'a script'}`)
+      }
+      return
+    }
+    const e = event as ErrorEvent
     debugAdd('global', 'error', e.message || 'Unknown error', {
       filename: e.filename,
       lineno: e.lineno,
       colno: e.colno,
     })
-  })
+  }
+  window.addEventListener('error', errorListener, true)
 
-  window.addEventListener('unhandledrejection', (e) => {
+  rejectionListener = (e) => {
     debugAdd('global', 'error', `Unhandled rejection: ${e.reason}`)
+  }
+  window.addEventListener('unhandledrejection', rejectionListener)
+
+  // Take over from the pre-React inline capture, when the page has one (see
+  // Pre-React Inline Pill): drain what it buffered before any module loaded,
+  // point the bridge here for code that calls it, and tell it to detach. Its
+  // listeners forwarding as well would log every error twice — measured in
+  // gp-props' dev build before its partial gained the hand-off: one throw,
+  // two entries; one rejection, two entries.
+  const buffered = (window as any).__debugErrors
+  if (Array.isArray(buffered)) {
+    buffered.forEach((err: { msg: unknown; stack?: unknown }) => {
+      debugAdd('global', 'error', String(err.msg), err.stack ? { stack: String(err.stack) } : undefined)
+    })
+    buffered.length = 0
+  }
+  ;(window as any).__debugPushError = (msg: unknown, stack?: unknown) => {
+    debugAdd('global', 'error', String(msg), stack ? { stack: String(stack) } : undefined)
+  }
+  ;(window as any).__debugCaptureHandOff?.()
+}
+
+// Vite (or any bundler exposing import.meta.hot). Restores what the guard
+// patched and lowers the flag; the new module instance then attaches afresh.
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    console.error = originalError
+    console.warn = originalWarn
+    if (errorListener) window.removeEventListener('error', errorListener, true)
+    if (rejectionListener) window.removeEventListener('unhandledrejection', rejectionListener)
+    subscribers.clear()
+    ;(window as any).__debugPushError = null
+    ;(window as any).__debugLogListenersAttached = false
   })
 }
 ```
 
+The guard and the dispose block are one mechanism — keep both or the hot reload story breaks in one of the two ways above. gp-props' `src/lib/debugLog.js` is the reference.
+
 ## Clipboard Utilities
 
-Extract clipboard logic into a shared module — reused by DebugPill, embed dialogs, export modals:
+Extract clipboard logic into a shared module — reused by DebugPill, embed dialogs, export modals. **It resolves `true` only when a method actually reported success**, because the caller turns that boolean into "Copied!" — and a person told "Copied!" goes off to paste an empty clipboard.
 
 ```typescript
+// Requirement: one copy routine whose answer the UI can trust.
+// Approach: ClipboardItem Blob → writeText → hidden textarea + execCommand,
+//   each failure falling through to the next. The last step returns
+//   execCommand's own result: it is false when the browser refuses (MDN: false
+//   if the command is unsupported or disabled, true only inside a user
+//   interaction). This doc's earlier version returned true unconditionally.
+// Alternatives: writeText only — rejected, it is refused in some installed-app
+//   webviews and non-secure contexts, which is where problems get reported from.
+// Adopted from sun-sea-o's src/utils/clipboard.ts, 2026-10-05.
 export async function copyToClipboard(text: string): Promise<boolean> {
   // Method 1: ClipboardItem Blob — works in contexts where writeText is blocked
   try {
     const blob = new Blob([text], { type: 'text/plain' })
     await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })])
     return true
-  } catch { /* fall through */ }
+  } catch { /* refused or unavailable — try the next method */ }
 
   // Method 2: writeText
   try {
     await navigator.clipboard.writeText(text)
     return true
-  } catch { /* fall through */ }
+  } catch { /* same — fall through to the legacy path */ }
 
-  // Method 3: Textarea fallback for mobile PWA webviews
+  // Method 3: hidden textarea + execCommand, for mobile PWA webviews
+  return copyWithTextarea(text)
+}
+
+function copyWithTextarea(text: string): boolean {
+  const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  // Inside the open modal <dialog>, not on <body>: everything outside a modal
+  // dialog is inert, and an inert textarea cannot take focus or a selection.
+  // Measured in Chromium: from a modal, a <body> textarea made execCommand
+  // return TRUE while the clipboard kept its old contents.
+  const host = previouslyFocused?.closest<HTMLElement>('dialog[open]') ?? document.body
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')       // no on-screen keyboard
+  textarea.setAttribute('aria-hidden', 'true')
+  // Off-view but selectable (display:none makes select() a no-op); 16px per
+  // the fleet's input rule, or iOS Safari zooms when it takes focus.
+  textarea.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px'
   try {
-    const textarea = document.createElement('textarea')
-    textarea.value = text
-    textarea.style.cssText = 'position:fixed;left:-9999px;top:-9999px'
-    document.body.appendChild(textarea)
+    host.appendChild(textarea)
     textarea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textarea)
-    return true
-  } catch { return false }
+    textarea.setSelectionRange(0, text.length)
+    return document.execCommand('copy')
+  } catch {
+    return false
+  } finally {
+    textarea.remove()                          // also on a throw
+    // Removing the focused textarea drops focus to <body> (measured); put it
+    // back on the Copy button so keyboard users keep their place.
+    previouslyFocused?.focus({ preventScroll: true })
+  }
 }
 ```
 
-For mobile browsers where even the textarea fallback fails, show the report in a `<textarea>` with `onFocus` auto-select so users can manually copy.
+**When it resolves `false`, show the text instead of an error.** Some installed-app webviews refuse all three methods. Replace the panel body with the report in a read-only `<textarea>` that selects itself on focus, a plain-language line above it, and a way back — sun-sea-o's `DebugPill/ManualCopy.tsx`:
+
+```tsx
+<p id="manual-copy-hint">Couldn't copy automatically. Select the text below and copy it yourself.</p>
+<textarea readOnly value={report} aria-labelledby="manual-copy-hint"
+  onFocus={(e) => e.currentTarget.select()} />
+<button type="button" onClick={() => setManualReport(null)}>Done</button>
+```
+
+Only a `true` result may change the button to "Copied!"; announce either outcome through a `role="status"` region, since a button's label changing mid-interaction is not reliably read out.
 
 ## Debug Pill Component
 
@@ -232,12 +332,18 @@ nav band, with fallbacks so it still places itself when the app stylesheet
 failed to load:
 
 ```typescript
-const PILL_BOTTOM = 'calc(var(--nav-height, 0px) + var(--safe-bottom, 0px) + 12px)'
+const PILL_BOTTOM =
+  'calc(var(--nav-height, 0px) + var(--safe-bottom, env(safe-area-inset-bottom, 0px)) + 12px)'
 // pill and panel: { position: 'fixed', bottom: PILL_BOTTOM, left: '12px', zIndex: 80, … }
 ```
 
 On desktop the shell folds `--nav-height` to `0px`, so the pill returns to the
-corner. Apps without a bottom nav (gp-props) are unaffected.
+corner. The `--safe-bottom` fallback is the raw inset, not `0px`: an app
+without the shell never defines `--safe-bottom`, and a `0px` fallback put its
+pill at 12px — inside the home-indicator band — on a `viewport-fit=cover`
+page. Measured in Chromium with a 34px emulated bottom inset: `0px` fallback →
+`bottom: 12px`; `env()` fallback → `46px`; a shell that publishes
+`--safe-bottom: 0px` (its phantom-inset override, APP_SHELL.md) still wins.
 
 ### Hydration-Safe Initialization
 
@@ -367,21 +473,44 @@ For apps where the JS bundle itself may fail to load, an inline `<script>` in `i
 <script>
   // Circular buffer for pre-React errors
   window.__debugErrors = [];
-  window.__debugPushError = function(msg, stack) {
-    window.__debugErrors.push({ msg: msg, stack: stack, time: Date.now() });
-    if (window.__debugErrors.length > 200) window.__debugErrors.shift();
-    // Update pill badge if it exists
-    var badge = document.getElementById('debug-error-count');
-    if (badge) { badge.textContent = window.__debugErrors.length; badge.style.display = ''; }
-  };
+  (function () {
+    function bufferPush(msg, stack) {
+      window.__debugErrors.push({ msg: msg, stack: stack, time: Date.now() });
+      if (window.__debugErrors.length > 200) window.__debugErrors.shift();
+      // Update pill badge if it exists
+      var badge = document.getElementById('debug-error-count');
+      if (badge) { badge.textContent = window.__debugErrors.length; badge.style.display = ''; }
+    }
+    // The bridge starts as the buffer; the store re-points it at itself on load.
+    // The listeners below keep the LOCAL bufferPush, never the global.
+    window.__debugPushError = bufferPush;
 
-  // Capture errors before any module scripts load
-  window.addEventListener('error', function(e) {
-    window.__debugPushError(e.message || 'Unknown error', e.filename + ':' + e.lineno);
-  });
-  window.addEventListener('unhandledrejection', function(e) {
-    window.__debugPushError('Unhandled rejection: ' + e.reason);
-  });
+    // Capture phase: a <script> that fails to load fires `error` on the element,
+    // and that event does not reach a bubbling window listener — which would
+    // never see the bundle failure this script exists for (measured in
+    // Chromium: a 404 module script reached only the capture listener).
+    function onError(e) {
+      var t = e.target;
+      if (t && t !== window && t.nodeType === 1) {
+        if (t.tagName === 'SCRIPT') bufferPush('Could not load ' + (t.src || 'a script'));
+        return; // an <img> or <link> failing is not an app error
+      }
+      bufferPush(e.message || 'Unknown error', e.filename + ':' + e.lineno);
+    }
+    function onRejection(e) {
+      bufferPush('Unhandled rejection: ' + e.reason);
+    }
+    window.addEventListener('error', onError, true);
+    window.addEventListener('unhandledrejection', onRejection);
+
+    // Called by debugLog once its own listeners are attached: from then on they
+    // see every error, so these would log each one a second time. (Adopted from
+    // sun-sea-o's index.html, 2026-10-05.)
+    window.__debugCaptureHandOff = function () {
+      window.removeEventListener('error', onError, true);
+      window.removeEventListener('unhandledrejection', onRejection);
+    };
+  })();
 
   // Loading timeout — warn user if framework fails to mount within 20s
   window.__debugReactMounted = false;
@@ -404,13 +533,13 @@ For apps where the JS bundle itself may fail to load, an inline `<script>` in `i
 </script>
 ```
 
-In `main.tsx`, call `window.__debugClearLoadTimer()` immediately after mount. Route `ErrorBoundary.componentDidCatch` errors through `window.__debugPushError()`.
+In `main.tsx`, call `window.__debugClearLoadTimer()` immediately after mount. Route `ErrorBoundary.componentDidCatch` errors through `window.__debugPushError()`. The store module (Debug Log Module above) drains `__debugErrors`, re-points `__debugPushError` at itself and calls `__debugCaptureHandOff()` — the inline script and the store must ship as a pair: an inline capture that keeps listening after the store loads doubles every error, and a store that never drains loses everything caught before it.
 
 ## Key Lessons
 
 1. **Separate React root is essential** — the pill must survive App crashes. Mount it in `#debug-root`, not inside `<App>`.
 2. **Use inline styles, not Tailwind** — the pill renders in an isolated root where app CSS may not be loaded. Inline styles ensure the pill always renders correctly.
-3. **Console interception catches React warnings** — patching `console.error` and `console.warn` at module load time captures framework warnings and library errors without explicit logging calls.
+3. **Console interception catches React warnings** — patching `console.error` and `console.warn` at module load time captures framework warnings and library errors without explicit logging calls. Patch inside the HMR guard and undo it in `import.meta.hot.dispose()`: outside the guard every hot reload stacks another wrapper, and a guard with no dispose leaves all capture bound to the first module instance, invisible to the live pill.
 4. **Redact URLs in debug reports** — strip query params (`?[redacted]`) to prevent accidental token, UTM, or sensitive data leaking when users share reports.
 5. **Immediate subscriber delivery eliminates timing bugs** — new subscribers receive all current entries on subscribe, not just future ones. Without this, a late-subscribing UI component misses the boot sequence.
 6. **Structured `details` over plain strings** — `Record<string, unknown>` enables post-mortem filtering and analysis. Plain string concatenation loses structure.
@@ -419,4 +548,4 @@ In `main.tsx`, call `window.__debugClearLoadTimer()` immediately after mount. Ro
 9. **PWA Diagnostics tab is invaluable** — active probes (manifest fetch, SW state, standalone mode) catch issues that static environment info misses.
 10. **Pre-React inline pill catches bundle failures** — the one scenario the React pill can't handle. The 20-second loading timeout with user-facing warning turns a blank screen into an actionable message.
 11. **Hydration-safe initialization** — `useState([])` + `useEffect` sync, not `useState(debugGetEntries())`. Prevents React hydration error #418 when SSR and client have different entries.
-12. **Multiple clipboard fallbacks** — ClipboardItem Blob → writeText → textarea → visible textarea with auto-select. Each handles a different browser/context limitation.
+12. **Multiple clipboard fallbacks** — ClipboardItem Blob → writeText → textarea → visible textarea with auto-select. Each handles a different browser/context limitation. Report success only when a method reported it — use `execCommand`'s return value, and put the textarea inside an open modal dialog — or "Copied!" lies and the visible-textarea fallback never appears.

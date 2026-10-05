@@ -251,7 +251,14 @@ Traps Tab/Shift+Tab within a container and restores focus on deactivation. Used 
 ```javascript
 import { useEffect, useRef } from 'react'
 
-const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+// The first and last matches are the trap's wrap points, so every entry must
+// be something Tab can actually land on. A disabled form control or a hidden
+// input that ends the list is a wrap point focus never reaches: Tab from the
+// real last control escapes the container, and Shift+Tab from the first calls
+// focus() on a dead element and sticks (measured in Chromium). `:not([disabled])`
+// on every form control comes from sun-sea-o (2026-10-05); `summary` (natively
+// tabbable — a <details> disclosure inside the dialog) from gp-props.
+const FOCUSABLE = 'a[href], button:not([disabled]), summary, textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 export function useFocusTrap(containerRef, active) {
   const previousFocusRef = useRef(null)
@@ -422,7 +429,10 @@ export function BurgerMenu({ items, id, version }) {
 
       {open && (
         <>
-          {/* Backdrop — z-40. cursor-pointer required for iOS Safari
+          {/* Backdrop — z-40. A real element, not a document-level
+              click/mousedown listener: the listener leaves the page beneath
+              live, so the tap that dismisses the menu ALSO activates
+              whatever it lands on. cursor-pointer required for iOS Safari
               (empty divs don't receive click events without it).
               Note: If parent header has backdrop-filter, render backdrop
               outside the header stacking context to avoid clipping. */}
@@ -431,6 +441,11 @@ export function BurgerMenu({ items, id, version }) {
             onClick={close}
           />
 
+          {/* Height cap, not overflow-hidden: on a landscape phone the item
+              list runs past the bottom of the window, and inside a
+              sticky/fixed header nothing can scroll it back into view —
+              overflow-hidden clipped the last items with no way to reach
+              them. The cap turns the card into its own scroller instead. */}
           <nav
             ref={menuRef}
             id={menuId}
@@ -438,7 +453,7 @@ export function BurgerMenu({ items, id, version }) {
             className="absolute right-0 top-full mt-2 z-50
                        w-56 max-w-[calc(100vw-2rem)] rounded-xl shadow-lg
                        bg-base-100 border border-base-300
-                       py-1 overflow-hidden overscroll-contain"
+                       py-1 max-h-[min(70dvh,32rem)] overflow-y-auto overscroll-contain"
             onKeyDown={handleMenuKeyDown}
           >
             <ul className="menu menu-sm p-0">
@@ -503,10 +518,12 @@ export function BurgerMenu({ items, id, version }) {
 - **`useFocusTrap` hook**: Tab/Shift+Tab boundary wrapping with previous-focus restoration. Reused by BurgerMenu and InstallInstructionsModal.
 - **`useId()` for unique IDs**: Prevents `aria-controls` collisions if multiple BurgerMenu instances exist on the same page.
 - **`cursor-pointer` on backdrop**: iOS Safari does not fire click events on empty `<div>` elements. Without `cursor-pointer`, tapping outside the menu on iPhone/iPad silently fails to close it.
+- **A backdrop element, not a document-level click/`mousedown` listener**: the listener carries the same iOS hazard, and it leaves the page beneath live — the first tap outside both dismisses the menu AND activates whatever it landed on (a link, a button, a form control). The backdrop swallows that tap. (Reason adopted from sun-sea-o's `src/constants/headerDropdown.ts`, 2026-10-05.)
 - **Externalized backdrop**: If the parent header uses `backdrop-filter`, render the backdrop outside the header stacking context (in the parent layout) to avoid `backdrop-blur-sm` clipping fixed children.
 - **DaisyUI `menu` classes** (if the app uses DaisyUI): `menu menu-sm` provides theme-aware hover states, padding, and focus indicators automatically.
 - **`min-h-11` (44px) touch targets**: Meets Apple HIG and Material Design minimum touch target guidelines.
-- **`overscroll-contain`**: Prevents scroll chaining without touching `document.body.style.overflow`.
+- **`max-h-[min(70dvh,32rem)] overflow-y-auto`, never `overflow-hidden`**: a menu of 44px rows outgrows a landscape phone. sun-sea-o measured its card running 43px past the bottom of a 740×360 window, with Diagnostics, Sign out and the version clipped and unreachable; gp-props' longer menu (theme picker included) ran 362px past the same window. A dropdown hangs off a sticky or fixed header, so scrolling the page never brings the lost rows back — the card has to scroll itself. The `70dvh` term is what guarantees reach; the `32rem` ceiling only keeps a short menu compact on tall screens. A legitimately long menu should drop the ceiling and cap at the room under its header instead (gp-props: `max-h-[calc(100dvh-5rem)]` under a 4rem navbar), or a desktop user scrolls a card that would have fit. Where the app publishes a measured `--app-height` (PWA_SYSTEM.md: Android standalone `dvh` can latch too tall after the update reload), cap against it instead: `max-h-[min(calc(var(--app-height)*0.7),32rem)]`. (Adopted from sun-sea-o, 2026-10-05.)
+- **`overscroll-contain`**: Stops scroll chaining only while the card actually overflows. Measured in Chromium (wheel scrolling): a capped card whose items fit, an uncapped card, and the backdrop all scroll the page behind the menu. Whether that matters is the app's call — see Key Lesson 5.
 - **`max-w-[calc(100vw-2rem)]`**: Prevents the dropdown from overflowing the viewport on narrow screens.
 - **Error routing to debug system**: `handleItem` routes failures through `window.__debugPushError()` when available, connecting menu errors to the debug pill.
 - **Icon support**: Per-item SVG icons via `item.icon` (path string) make items scannable. `item.iconClass` allows per-icon color overrides (e.g., sun/moon icons in theme colors).
@@ -780,10 +797,10 @@ Vue projects use the same patterns with framework-specific adaptations:
 ## Key Lessons
 
 1. **`role="menu"` is for application menus only** — File/Edit/View style. Screen readers enter forms mode, suppress normal navigation keys, and expect arrow-key item navigation. A burger nav menu is a disclosure — use `aria-expanded` on the trigger and `<nav>` with a `<ul>/<li>` list. Do not use `aria-haspopup` (it signals "this opens an application menu").
-2. **iOS Safari does not fire click events on empty divs** — the backdrop overlay must have `cursor: pointer` (Tailwind: `cursor-pointer`) or it silently fails on all iPhones and iPads. This is an intentional iOS Safari optimization, not a bug, and has persisted across all iOS versions.
+2. **iOS Safari does not fire click events on empty divs** — the backdrop overlay must have `cursor: pointer` (Tailwind: `cursor-pointer`) or it silently fails on all iPhones and iPads. This is an intentional iOS Safari optimization, not a bug, and has persisted across all iOS versions. Don't swap the backdrop for a document-level click listener to dodge this: the listener has the same iOS problem and leaves the page live, so the dismissing tap also activates whatever is under it.
 3. **Extract focus logic into reusable hooks** — `useDisclosureFocus`, `useFocusTrap`, and `useEscapeKey` are used by BurgerMenu, modals, and other disclosures. Don't inline focus management in each component.
 4. **Arrow key + Home/End navigation** — cycling through items with wrapping improves keyboard accessibility. Not required by the disclosure pattern spec but expected by power users.
-5. **`overscroll-behavior: contain` avoids the scroll lock race** — two components both writing `document.body.style.overflow = 'hidden'` causes one to overwrite the other's cleanup on unmount. Using `overscroll-contain` on the menu card prevents scroll chaining without touching body styles.
+5. **Two writers of `document.body.style.overflow` race** — when two components both set `overflow = 'hidden'`, one's cleanup on unmount overwrites the other's. `overscroll-contain` on the menu card avoids body styles entirely, but it only contains chaining while the card overflows: when the items fit, and anywhere on the backdrop, the page behind still scrolls (measured, Chromium). If a menu can live with that, `overscroll-contain` alone is the pattern. If the page must stay still, lock it — through exactly ONE owner of body styles (APP_SHELL.md's refcounted lock), never from each component that opens something.
 6. **`stopPropagation` is unreliable in React Native Web** — nested `Pressable` event propagation doesn't always work because the RN event system is separate from the DOM. Use `e.target === e.currentTarget` on the outer backdrop handler instead.
 7. **Extract `ModalBackdrop` for React Native** — Modal + Pressable + Escape handling as a reusable component eliminates boilerplate across BurgerMenu, search modals, and filter drawers.
 8. **Close-then-act with 50-150ms delay** — close the menu before executing the action to prevent visual glitches from state changes while the menu is visible. Adjust the delay to match the actual transition duration (50ms for snappier, 150ms for animated). Clean up the timer on unmount using a ref.
@@ -794,3 +811,4 @@ Vue projects use the same patterns with framework-specific adaptations:
 13. **If wrapping in `React.memo`, memoize the `items` array** — inline array literals (`items={[...]}`) create new references every render, defeating memoization. Use `useMemo` for the items array if the parent re-renders frequently and the menu is memoized.
 14. **Keep the menu open during theme switching** — DO NOT close the menu when a theme is selected. Users need to compare themes by clicking through the list rapidly. Only close on backdrop click, Escape, or navigation actions. This applies to both per-mode theme pickers and combo selectors.
 15. **Theme picker needs `overscroll-contain` separately** — If the theme list is scrollable (`max-h-52 overflow-y-auto`), it needs its own `overscroll-contain` to prevent scroll chaining to the menu container or the page body. Two levels of `overscroll-contain`: one on the menu card, one on the scrollable theme list.
+16. **Cap the card's height; never `overflow-hidden`** — a dropdown hanging off a sticky or fixed header cannot be reached by scrolling the page, so rows past the bottom of a landscape phone are simply gone. `max-h-[min(70dvh,32rem)] overflow-y-auto` makes the card its own scroller (sun-sea-o measured the clip at 740×360, 2026-10-05).

@@ -130,8 +130,12 @@ if (typeof window !== 'undefined' && !window.__themeListenersAttached) {
   // darkMode falls back to the OS preference when unset, matching the pre-paint
   // bootstrap: a never-toggled OS-dark user whose other tab writes only a theme
   // key (random-theme-on-load does) must not get flipped to light here.
+  // e.key === null is storage.clear() in another tab (no per-key events fire
+  // for it): re-derive from the now-empty storage, which lands on the same
+  // defaults a fresh visit gets. Without it this tab kept the cleared theme
+  // until reload (THEME_DARK_MODE.md Cross-Tab Sync; sun-sea-o's handler).
   storageListener = (e) => {
-    if (e.key === 'darkMode' || e.key === 'lightTheme' || e.key === 'darkTheme') {
+    if (e.key === null || e.key === 'darkMode' || e.key === 'lightTheme' || e.key === 'darkTheme') {
       const stored = safeLocalGet('darkMode');
       const dark = stored !== null
         ? stored === 'true'

@@ -60,11 +60,26 @@ function oklchToHex(oklchStr) {
 
 // ===== Extract meta colors: light → primary, dark → base-100 =====
 
+// Requirement: a colour this script cannot read must stop the run.
+// Why: the old `|| '#000000'` fallback turned an unparseable value (DaisyUI
+//   changing its colour syntax, a theme dropping the key) into a black status
+//   bar written into four files, with "Updated ..." printed over it — the
+//   same silent-success failure mustReplace() below exists to prevent
+//   (THEME_DARK_MODE.md, Build Script).
+// Alternative: a neutral fallback colour — rejected, it ships a wrong value
+//   that no check would ever flag.
+function fail(message) {
+  console.error(`FAILED: ${message} Update scripts/generate-meta-colors.mjs.`);
+  process.exit(1);
+}
+
 const metaColors = {};
 for (const name of [...lightThemes, ...darkThemes]) {
   const theme = themes[name];
   const colorKey = darkThemes.includes(name) ? '--color-base-100' : '--color-primary';
-  metaColors[name] = oklchToHex(theme[colorKey]) || '#000000';
+  const hex = oklchToHex(theme[colorKey] || '');
+  if (!hex) fail(`theme "${name}" ${colorKey} is not an oklch() value this script can convert (got ${JSON.stringify(theme[colorKey])}).`);
+  metaColors[name] = hex;
 }
 
 // ===== Output formatters =====
@@ -184,7 +199,8 @@ console.log('Updated partials/head-common.html');
 // on). The media-qualified pair was dropped: Chromium re-evaluates those
 // unreliably after a JS content update in standalone/WebAPK (THEME_DARK_MODE
 // pattern). Missing a page lets it silently drift on the next DaisyUI update.
-const defaultLightColor = metaColors['caramellatte'] || '#000000';
+const defaultLightColor = metaColors['caramellatte'];
+if (!defaultLightColor) fail('the default light theme "caramellatte" is no longer in DaisyUI\'s catalog.');
 for (const htmlFile of ['index.html', 'pattern.html', 'project.html']) {
   const htmlPath = join(root, htmlFile);
   let html = readFileSync(htmlPath, 'utf8');
