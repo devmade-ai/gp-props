@@ -424,10 +424,13 @@ below 30.
 - **Scrimmed drawers use a real backdrop element** at 40, not a
   document-level click handler — and the backdrop carries `cursor-pointer`,
   or iOS Safari silently drops taps on the empty div (BURGER_MENU.md Key
-  Lesson 2). gp-props' burger uses the handler because
-  its blurred navbar traps a backdrop (a documented local deviation in that
-  repo's notes); the shell has no such constraint, and copying the
-  deviation copies the exception without the reason.
+  Lesson 2). The handler is not a cheaper equivalent: it leaves the page
+  live, so the tap that dismisses the drawer also activates whatever it
+  lands on. gp-props' burger portals its backdrop to `<body>` at z-20,
+  under its blurred navbar's z-30, because that navbar's stacking context
+  traps a backdrop at 40 (a documented local deviation in that repo's
+  notes); the shell has no such constraint, and copying the deviation
+  copies the exception without the reason.
 - **Toast position is separate from toast stacking.** z-70 says what paints
   on top; on mobile the toast also offsets
   `bottom: calc(var(--nav-height) + var(--safe-bottom) + 0.5rem)`
