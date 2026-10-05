@@ -26,3 +26,13 @@ Delete an item when it is done — git history is the record.
   toast in any app whose modals use `<dialog showModal()>` (PWA_SYSTEM.md
   Toast System); vite-plugin-pwa ≥1.3.0 wherever `onNeedReload` is passed.
   Enumerate from the org and follow `docs/FLEET_CHANGES.md`.
+
+- [ ] **Check every repo's "Kept From Replaced Sections" for headless
+  repo-owned sections.** sun-sea-o's `## Adopted Patterns` lost all its
+  headings when the 2026-08-19 marker installation line-rescued it
+  (FLEET_CHANGES step 5, AI_MISTAKES 2026-10-05); any repo whose rescued block
+  carries lines prefixed with a section name canonical doesn't have (e.g.
+  `Adopted Patterns ::`, `Project Overview ::`) may have the same damage.
+  Rebuild such a section below the marker from the pre-sync commit, re-checking
+  each fact against the code. tool-till-tees' block was checked 2026-10-05: AI
+  Notes lines only, no repo-owned section lost.

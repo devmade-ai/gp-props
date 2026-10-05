@@ -49,7 +49,16 @@ shaped around are in [`AI_MISTAKES.md`](AI_MISTAKES.md) (2026-08-10 and
    `repo-tor` leads with its product title and keeps docs as a table; `see-veo`
    had a five-bullet `## Communication Style` stub. Both needed bespoke edits,
    and flattening them would have been worse than the drift. The same applies to
-   installing the marker the first time.
+   installing the marker the first time — and there, **classify each section
+   by who owns it, not where it sits.** A repo-specific section that happens to
+   sit above where the marker goes (because it predates the marker) is local:
+   move it below the marker whole, headings included. Never "rescue" it line
+   by line into a leftovers block — a rescue that keeps a section's body and
+   drops its headings keeps every word and loses what the section was for. On
+   2026-08-19 sun-sea-o's `## Adopted Patterns` (its per-pattern status record)
+   went through that rescue: 214 lines kept, all fourteen `### PATTERN —
+   status` headings dropped, and for seven weeks nothing said which pattern was
+   implemented (sun-sea-o `docs/AI_MISTAKES.md`, 2026-10-05).
 
 6. **Deletions never go in the loop** — see the 2026-08-10 mistakes entry. A
    whole-file replace already deletes; anything beyond that (emptying a doc,

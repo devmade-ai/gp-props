@@ -1,5 +1,27 @@
 # AI Mistakes
 
+## 2026-10-05: The first marker installation line-rescued a repo-owned section and dropped its headings
+
+**What went wrong:** The 2026-08-19 sync installed the LOCAL marker in
+sun-sea-o and treated its `## Adopted Patterns` section — a repo-owned
+per-pattern status record that sat above the marker only because it predated
+it — as replaced canonical text. Its body lines were rescued into "Kept From
+Replaced Sections" one by one and its fourteen `### PATTERN — status`
+headings were dropped, so the record kept every word and stopped saying which
+pattern each line described or whether it was implemented. Full account in
+sun-sea-o `docs/AI_MISTAKES.md` (2026-10-05).
+
+**Which rule produced it:** FLEET_CHANGES step 5 left "installing the marker
+the first time" to judgement without saying what to judge by; the sync
+classified sections by position.
+
+**How to prevent it:** FLEET_CHANGES step 5 now says it: classify by owner,
+move repo-owned sections below the marker whole, never line-rescue a section
+you are keeping. Other repos that went through the same first installation
+may carry the same damage — tracked in `docs/TODO.md`.
+
+---
+
 ## 2026-08-24: Prescribed `dvh` and `interactive-widget` for the app-shell baseline, contradicting the fleet's written viewport/keyboard lesson
 
 **What went wrong:** A gap-analysis pass on the mobile app-shell spec prescribed "use `dvh`/`svh`, not `vh`" for drawer and modal heights, and `interactive-widget=resizes-content` for virtual-keyboard adaptation. Both contradict `PWA_SYSTEM.md` Platform Gotchas: Android standalone `100dvh` latches too tall after the PWA update reload (bottom nav off-screen until full relaunch — the settled fix is a measured `--app-height` from `innerHeight` with `dvh` only as CSS fallback, and no `resize` tracking on the shell), and resizing the layout viewport when the keyboard opens is exactly the shell-collapse class that rule exists to prevent. The same reply also claimed to "extend" `Z_INDEX_SCALE` while listing an invented total order that dropped backdrop, menu, and debug. Caught in review before any of it froze into a pattern doc.
