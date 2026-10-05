@@ -12,7 +12,7 @@ order: 1
 
 # PWA System
 
-Four parts, built on `vite-plugin-pwa` (^1.2.0) with React. Adapt patterns for other frameworks — see "Framework variants" below for the Vue form and the SSR/SSG form.
+Four parts, built on `vite-plugin-pwa` (^1.3.0 — the first release whose register options accept `onNeedReload`; everything else here also runs on 1.2.x) with React. Adapt patterns for other frameworks — see "Framework variants" below for the Vue form and the SSR/SSG form.
 
 **Reference implementations:** gp-props (React 19 MPA, framework-agnostic singleton + React bridge), kl-website and qi-invoice (React SPA, singleton + `useSyncExternalStore`), fl-farlume (Vue 3, module-scope `useRegisterSW`).
 
@@ -330,7 +330,7 @@ B is the more precise form: `r.waiting` present at first registration *is* the l
 
 **Do not read anything into `updateServiceWorker(true)`'s argument — it has been inert since vite-plugin-pwa 0.13.2.** The shipped client is `async (_reloadPage = true) => { await registerPromise; if (!auto) sendSkipWaitingMessage?.() }`; the plugin's own type declarations say so. Calling it and posting `SKIP_WAITING` yourself are the same operation, so the invariant applies identically to both.
 
-**The plugin also installs its own unconditional reload, and your latch cannot veto it.** That same `'waiting'` handler runs `wb.addEventListener('controlling', e => { if (e.isUpdate) { onNeedReload ? onNeedReload() : window.location.reload() } })`. Your `controllerchange` guard gates *your* reload; this one fires regardless. So after a user taps "Later", any subsequent controller change — another tab applying the update, an external `skipWaiting` — reloads this tab over their unsaved work, which is exactly what policy step 2 promises won't happen. **If step 2's guarantee matters to your app, pass `onNeedReload` to `useRegisterSW` and route the decision through your own latch.**
+**The plugin also installs its own unconditional reload, and your latch cannot veto it.** That same `'waiting'` handler runs `wb.addEventListener('controlling', e => { if (e.isUpdate) { onNeedReload ? onNeedReload() : window.location.reload() } })`. Your `controllerchange` guard gates *your* reload; this one fires regardless. So after a user taps "Later", any subsequent controller change — another tab applying the update, an external `skipWaiting` — reloads this tab over their unsaved work, which is exactly what policy step 2 promises won't happen. **If step 2's guarantee matters to your app, pass `onNeedReload` to `useRegisterSW` and route the decision through your own latch.** That option first exists in **vite-plugin-pwa 1.3.0** (checked against the published 1.2.0 and 1.3.0 packages, 2026-10-05): 1.2.0's `controlling` handler is a bare `if (event.isUpdate) window.location.reload()`, its types have no `onNeedReload`, and the option is silently ignored. A `^1.2.0` range resolves to 1.3.x on a fresh install, but a lockfile pinned at 1.2.x keeps the unconditional reload — check the installed version (`npm ls vite-plugin-pwa`) before relying on it.
 
 **Related echo:** workbox-window also fires `onNeedRefresh` for a worker that was already waiting before `register()` (`wasWaitingBeforeRegister`). That can land before your registration handler runs and arm the banner for a frame before the launch-apply reload; clearing `_hasUpdate` inside the launch-apply branch (above) covers it. When the preference is OFF, arm the banner explicitly rather than relying on the echo.
 
@@ -1499,7 +1499,7 @@ Generate `version.json` at build time with `{ "buildTime": "2026-04-06T12:00:00Z
 
 The PWA layer is testable, and the riskiest behavior in it — launch-apply, an *unwanted reload* — is exactly what you want pinned. Two obstacles, both solved:
 
-**0. You may not need any of this.** If the policy lives in a plain module that imports no virtual module — the shape recommended above — you can test it directly with a storage shim and no mocking infrastructure at all. sun-sea-o pins 40 policy cases that way. The alias below is only needed to test the *hook*.
+**0. You may not need any of this.** If the policy lives in a plain module that imports no virtual module — the shape recommended above — you can test it directly with a storage shim and no mocking infrastructure at all. sun-sea-o pins 35 policy cases that way (`src/__tests__/pwaSingleton.test.ts`). The alias below is only needed to test the *hook*.
 
 One trap when the policy module is a singleton: **ESM hoisting evaluates it before `beforeAll` installs your shims**, so a singleton that reads storage at module init (which the preference pattern does) must tolerate storage-less init and re-derive that state in its reset helper.
 
@@ -1637,7 +1637,7 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 
 **`apple-touch-startup-image` needs real splash images:** it takes exact device-sized images selected by media queries. Pointing it at a 180px touch icon (a common copy-paste) is ignored or mis-rendered — omit it unless you generate the full set.
 
-**Expo Web incompatibility:** vite-plugin-pwa is not compatible with Expo Web (Expo Router uses Metro, not Vite). For Expo Web PWAs, use `workbox-cli generateSW` as a post-build step and manually wire up SW registration and update detection.
+**Expo Web incompatibility:** vite-plugin-pwa is not compatible with Expo Web (Expo Router uses Metro, not Vite). For Expo Web PWAs, hand-write the service worker and wire up SW registration and update detection yourself — see "Custom Service Worker (Non-Vite Projects)", which explains why `workbox-cli generateSW` is not the route.
 
 ## Key Lessons
 
@@ -1687,7 +1687,7 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 36. **`navigateFallback` names the app shell** — it fires on every navigation regardless of connectivity, it defaults to `'index.html'` so MPAs must pass `null` rather than omit it, and the URL must be in the precache manifest or the worker throws on evaluation and never installs.
 36b. **`navigateFallbackDenylist` for anything same-origin served from outside the build** — API routes, edge-generated files. Otherwise a direct navigation to them returns the app shell.
 36c. **`registerSW`/`useRegisterSW` exactly once per app** — a state singleton does not dedupe registration, and the hook form registers once per consumer.
-36d. **`updateServiceWorker(true)`'s argument is inert**; the plugin installs its own unconditional reload on `controlling`. Pass `onNeedReload` if "never reload mid-session" has to be a real guarantee.
+36d. **`updateServiceWorker(true)`'s argument is inert**; the plugin installs its own unconditional reload on `controlling`. Pass `onNeedReload` if "never reload mid-session" has to be a real guarantee — and have vite-plugin-pwa ≥1.3.0 installed, because 1.2.x ignores the option.
 36e. **`registration.update()` can hang forever** — bound it and read the verdict off the registration, or one hang plus in-flight sharing wedges the check for the session.
 36f. **Never runtime-cache a credentialed endpoint** — the cache key is the URL, so one user's response is served to the next; and sign-out does not clear Cache Storage.
 36g. **Opaque responses are one-way poison** — `[0, 200]` only for resources you never read back.
