@@ -101,22 +101,47 @@
      The 20s watchdog turns a silent blank page into a plain-language message:
      with render-then-replace, a failed module leaves whatever markup was
      prerendered but nothing interactive.
+     Hand-off (DEBUG_SYSTEM.md, Pre-React Inline Pill): src/lib/debugLog.js
+     drains __debugErrors, re-points __debugPushError at its store and calls
+     __debugCaptureHandOff(), which detaches these listeners. They used to
+     forward through the re-pointed global, so in dev every error landed in
+     the store twice (measured: one throw, two entries). The listeners push
+     to the LOCAL bufferPush for the same reason. The error listener is on
+     the capture phase because a <script> that fails to load fires on the
+     element and never reaches a bubbling window listener — the exact
+     failure this block exists for.
      Cleanup contract: attach guard + the paired clearTimeout lives in
-     __debugClearLoadTimer, called by every page entry after mount. -->
+     __debugClearLoadTimer, called by every page entry after mount; the
+     listeners are removed by __debugCaptureHandOff (dev; production has no
+     store to hand off to, so they keep buffering, capped at 200). -->
 <script>
   if (!window.__debugCaptureAttached) {
     window.__debugCaptureAttached = true;
     window.__debugErrors = [];
-    window.__debugPushError = function (msg, stack) {
-      window.__debugErrors.push({ msg: msg, stack: stack, time: Date.now() });
-      if (window.__debugErrors.length > 200) window.__debugErrors.shift();
-    };
-    window.addEventListener('error', function (e) {
-      if (window.__debugPushError) window.__debugPushError(e.message || 'Unknown error', e.filename + ':' + e.lineno);
-    });
-    window.addEventListener('unhandledrejection', function (e) {
-      if (window.__debugPushError) window.__debugPushError('Unhandled rejection: ' + e.reason);
-    });
+    (function () {
+      function bufferPush(msg, stack) {
+        window.__debugErrors.push({ msg: msg, stack: stack, time: Date.now() });
+        if (window.__debugErrors.length > 200) window.__debugErrors.shift();
+      }
+      window.__debugPushError = bufferPush;
+      function onError(e) {
+        var t = e.target;
+        if (t && t !== window && t.nodeType === 1) {
+          if (t.tagName === 'SCRIPT') bufferPush('Could not load ' + (t.src || 'a script'));
+          return;
+        }
+        bufferPush(e.message || 'Unknown error', e.filename + ':' + e.lineno);
+      }
+      function onRejection(e) {
+        bufferPush('Unhandled rejection: ' + e.reason);
+      }
+      window.addEventListener('error', onError, true);
+      window.addEventListener('unhandledrejection', onRejection);
+      window.__debugCaptureHandOff = function () {
+        window.removeEventListener('error', onError, true);
+        window.removeEventListener('unhandledrejection', onRejection);
+      };
+    })();
 
     window.__debugReactMounted = false;
     window.__debugClearLoadTimer = function () {

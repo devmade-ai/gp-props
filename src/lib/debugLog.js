@@ -185,6 +185,10 @@ if (typeof window !== 'undefined' && !window.__debugLogListenersAttached) {
     debugAdd('global', 'error', String(msg), stack ? { stack: String(stack) } : undefined);
   };
   window.__debugAdd = debugAdd;
+  // The listeners above now see every error; the head partial's would log
+  // each one a second time, so tell it to detach (DEBUG_SYSTEM.md, Pre-React
+  // Inline Pill). A no-op on re-evaluation after HMR — already detached.
+  window.__debugCaptureHandOff?.();
 }
 
 if (import.meta.hot) {
