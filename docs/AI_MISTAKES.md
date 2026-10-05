@@ -1,5 +1,26 @@
 # AI Mistakes
 
+## 2026-10-05: Opened a second PR in two repos that already had one open
+
+**What went wrong:** Asked to "create the prs", the sancio-alignment session
+opened sun-sea-o#48 and tool-till-tees#51 from its own branch after checking
+only for PRs from that branch. Both repos already had an open PR from a
+2026-09-11 session's branch (sun-sea-o#47, tool-till-tees#49), never merged.
+The repos ended up with two PRs each, overlapping and conflicting (#47 and #48
+both edited CLAUDE.md, App.tsx and routes.ts). The owner wants one per repo.
+Resolved the same day by merging the older branches into the newer ones,
+fixing their review findings there, and closing #47 and #49.
+
+**Which rule produced it:** None by the letter. Each session is given its own
+branch, so "is there a PR for my branch?" is the natural check, and it can't
+see another session's work.
+
+**How to prevent it:** Before opening a PR, list the repo's open PRs, not
+just this branch's. If one exists, raise it before opening another: the
+choice is folding one branch into the other, which is the owner's call.
+
+---
+
 ## 2026-10-05: Offered renaming the canonical colour tokens without saying what the names are for
 
 **What went wrong:** The sancio-alignment pass found that DESIGN_TOKENS'
