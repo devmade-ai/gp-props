@@ -1,5 +1,30 @@
 # AI Mistakes
 
+## 2026-10-05: Offered renaming the canonical colour tokens without saying what the names are for
+
+**What went wrong:** The sancio-alignment pass found that DESIGN_TOKENS'
+text colour roles (`--text-strong` …) sit in Tailwind v4's font-size
+namespace, and offered "rename the colour tokens, or keep them" as a
+decision. The user picked rename. The option never said that the names are
+what Claude Design design systems emit, so renaming them breaks the one
+property the contract exists for. It also never said that fc-fanfare-chess
+already avoids the collision with an `@theme inline` bridge. The same pass
+had written a worse bridge into the doc (`--color-text-strong`, yielding
+`text-text-strong`). Caught when the user asked why the rename was
+happening, before anything was renamed.
+
+**Which rule produced it:** Communication, "Cheap to reply to": an option
+must name what it does specifically enough to be judged. "Rename" named the
+edit but not what it would break.
+
+**How to prevent it:** An option that changes a published name lists
+everything that consumes the name — here, every design system and every
+app on the contract — and is checked against the fleet's existing answer
+before it is offered. A collision with a tool is fixed on the tool's side
+when the name is a contract.
+
+---
+
 ## 2026-10-05: The first marker installation line-rescued a repo-owned section and dropped its headings
 
 **What went wrong:** The 2026-08-19 sync installed the LOCAL marker in

@@ -237,12 +237,28 @@ What that does to the names in this contract:
   ignores them (no utility, no harm). Declared in `@theme` — which rule 2
   of The One Styling Interface invites — `text-strong` compiles to
   `font-size: var(--text-strong)`: a colour as a font size, dropped as
-  invalid, and still no colour utility. **Mitigation, no rename:** keep the
-  roles on `:root` / `[data-theme]` and bridge them into the colour
-  namespace with `@theme inline { --color-text-strong: var(--text-strong);
-  --color-surface-card: var(--surface-card); … }`, which yields
-  `text-text-strong` → `color: var(--text-strong)` and `bg-surface-card`,
-  resolved at runtime so a `[data-theme]` re-mapping still reaches them.
+  invalid, and still no colour utility. **The fix is on the Tailwind side,
+  never a rename:** these are the names Claude Design design systems emit
+  (The Published Contract), so renaming them would put a translation table
+  back between the design and the app. Never declare a colour role in
+  `@theme`. Keep the roles on `:root` / `[data-theme]` and bridge them into
+  the colour namespace with `@theme inline`, naming each bridge **by the
+  class suffix it should produce** — never by the token's own name:
+
+  ```css
+  @theme inline {
+    --color-strong:       var(--text-strong);     /* text-strong     */
+    --color-muted:        var(--text-muted);      /* text-muted      */
+    --color-on-accent:    var(--text-on-accent);  /* text-on-accent  */
+    --color-hairline:     var(--border-hairline); /* border-hairline */
+    --color-surface-card: var(--surface-card);    /* bg-surface-card */
+  }
+  ```
+
+  `--color-text-strong` would work but yields `text-text-strong`. `inline`
+  makes each utility a `var()` reference resolved at runtime, so a
+  `[data-theme]` re-mapping still reaches it. Taken from fc-fanfare-chess
+  `main.css`, which ships the full set this way.
 - **`--container-*` layout widths share Tailwind's container namespace.**
   Name per-surface widths with keys Tailwind does not define
   (`--container-reading`, `--container-sidebar`): unlayered they override
