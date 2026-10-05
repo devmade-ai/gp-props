@@ -20,7 +20,9 @@ Delete an item when it is done — git history is the record.
   place of `overflow-hidden` (BURGER_MENU.md); `e.key === null` in every
   theme `storage` listener (THEME_DARK_MODE.md); console patches inside the
   debug store's HMR guard plus an `import.meta.hot.dispose()` block
-  (DEBUG_SYSTEM.md — sun-sea-o has the guard but no dispose); a top-layer
+  (DEBUG_SYSTEM.md); a copy routine that reports only real success, with
+  the manual-copy view, the inline-capture hand-off and an env() fallback
+  for the pill's bottom inset (DEBUG_SYSTEM.md); a top-layer
   toast in any app whose modals use `<dialog showModal()>` (PWA_SYSTEM.md
   Toast System); vite-plugin-pwa ≥1.3.0 wherever `onNeedReload` is passed.
   Enumerate from the org and follow `docs/FLEET_CHANGES.md`.
