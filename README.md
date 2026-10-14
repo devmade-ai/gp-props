@@ -8,7 +8,7 @@ Portfolio and resource hub for devmade-ai projects. Deployed via Vercel.
 
 A React + Vite static site (build-time SSG, no server) that serves two purposes:
 
-1. **Project portfolio** — Showcases user-facing applications with live links and source code
+1. **Project portfolio** — Showcases user-facing applications with live links. A source link is included when the repo is public.
 2. **Pattern library** — Reusable engineering patterns extracted from real projects (PWA, dark mode, burger menu, etc.)
 
 Also hosts `CLAUDE.md` — a comprehensive AI assistant ruleset used as a reference across all devmade-ai projects — and serves as the fleet's **reference implementation of the patterns' React variants** (BurgerMenu + focus hooks, PWA module singleton + hooks, ToastProvider, Theme Approach A).

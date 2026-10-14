@@ -7,7 +7,9 @@
 
 export const HERO = {
   title: 'Software projects & engineering patterns',
-  subtitle: 'User-facing apps and reusable implementation patterns. Built with React, TypeScript, and modern web standards.',
+  // No single stack: Farlume is Vue and JavaScript, and other featured apps
+  // are Expo or React. Naming React and TypeScript here described one of them.
+  subtitle: 'User-facing apps and reusable implementation patterns. Stacks include React, Vue, and Expo.',
 };
 
 export const PROJECTS = [
