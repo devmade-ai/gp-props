@@ -1,0 +1,38 @@
+{
+  "name": "fc-fanfare-chess",
+  "title": "Fanfare Chess",
+  "description": "Two-player chess with a secret setup: arrange your bishops and knights in private, reveal them together, then play.",
+  "category": "user-facing",
+  "badge": "Game",
+  "status": "active",
+  "repo": "private",
+  "liveUrl": "https://fc-fanfare-chess.vercel.app/",
+  "tech": [
+    "JavaScript",
+    "React",
+    "Vite",
+    "chess.js",
+    "Supabase",
+    "Tailwind CSS",
+    "PWA"
+  ],
+  "audience": "Anyone who wants to play chess with a friend, with a secret piece arrangement before the game starts, without creating an account.",
+  "useCases": [
+    "Two friends share a link, each secretly places their bishops and knights, then play a normal game with the colours assigned at random",
+    "Someone on a train with no signal opens Practice, picks a strength, and plays against the board entirely on the device",
+    "A player turns on turn alerts, gets a notification when a friend joins or it's their move, and opens that game from the notification",
+    "After a finished game both players tap Rematch and land in one new game with the colours swapped, with no new code to send"
+  ],
+  "dataPrivacy": {
+    "storage": "Shared games are stored so both players can open them. Practice games stay on the device and never appear in the games list.",
+    "authentication": "None. There are no accounts. An anonymous identity is created on the device. Clearing site data or uninstalling loses the games on that device, by design.",
+    "transmission": "A shared game sends the moves, the secret setups (hidden from the opponent until both confirm), the chat, and the result. Practice sends nothing and works with the network switched off. Turn alerts, only if turned on, use the browser's notifications.",
+    "thirdParty": "Supabase holds the shared games. Web Push delivers turn alerts when they are turned on."
+  },
+  "docs": {
+    "readme": true,
+    "userGuide": true,
+    "testingGuide": true,
+    "tutorial": true
+  }
+}

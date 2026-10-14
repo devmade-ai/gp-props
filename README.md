@@ -27,6 +27,7 @@ Also hosts `CLAUDE.md` — a comprehensive AI assistant ruleset used as a refere
 | [Borderline](https://bl-borderline.vercel.app/) | Countries-of-the-world "name them all" game, alone or against a friend | JS, React, Vite, Supabase, PWA |
 | [Pixel Art](https://px-pixelart.vercel.app/) | Very basic pixel-picture maker | JS, React, Vite, PWA |
 | [Quick Invoice](https://qi-invoice.vercel.app/) | Fill in an invoice and download it as a PDF. Nothing leaves the device | TS, React, Vite, pdf-lib, PWA |
+| [Fanfare Chess](https://fc-fanfare-chess.vercel.app/) | Two-player chess with a secret setup | JS, React, chess.js, Supabase, PWA |
 
 ## Engineering Patterns
 

@@ -105,4 +105,22 @@ export const PROJECTS = [
     tech: 'TypeScript · React · Vite · pdf-lib · PWA',
     live: 'https://qi-invoice.vercel.app/',
   },
+  {
+    // Requirement: Fanfare Chess joins the featured set at the end of the list.
+    // Approach: card built from public/projects/fc-fanfare-chess. Title and
+    //   Game badge from meta.json; description from the README lead; tech
+    //   shortened the way the other cards shorten theirs. No source link —
+    //   the repo is private. Second badge is PWA, same as Borderline: friends
+    //   use the server, and the app is installable with offline practice.
+    // Alternatives:
+    // - Second badge "On-device": rejected — the shared game does not stay
+    //   on the device. Practice does, but that is not the product's lead.
+    // - Source link: rejected — the repo is private.
+    slug: 'fc-fanfare-chess',
+    title: 'Fanfare Chess',
+    badges: [{ label: 'Game', primary: true }, { label: 'PWA' }],
+    description: 'Two-player chess with a secret setup. Each player arranges their bishops and knights in private, both setups are revealed at once, then it\'s standard chess. Share a link — no accounts.',
+    tech: 'JavaScript · React · chess.js · Supabase · PWA',
+    live: 'https://fc-fanfare-chess.vercel.app/',
+  },
 ];
