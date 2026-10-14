@@ -12,22 +12,22 @@ export const HERO = {
   subtitle: 'User-facing apps and reusable implementation patterns. Stacks include React and Expo.',
 };
 
+// Requirement: featured cards render in this hand-picked order — Sancio,
+//   inTXT, FuelHunt, Graphiki, Quick Invoice, knowless, redline, Fanfare
+//   Chess, Borderline, Pixel Art, devmade.
+// Approach: array order is the display order. HomePage maps PROJECTS as
+//   written. The sitemap lists project folders from the filesystem, and
+//   JSON-LD describes each page on its own, so neither follows this array.
+// Alternatives:
+// - Alphabetical or filesystem order: rejected — the order is a product choice.
 export const PROJECTS = [
   {
-    slug: 'graphiki',
-    title: 'Graphiki',
-    badges: [{ label: 'Knowledge', primary: true }, { label: 'On-device' }],
-    description: 'Graph-based knowledge workspace. Build and explore networks of ideas, people, and concepts with visual queries. Runs entirely in the browser.',
-    tech: 'TypeScript · Cytoscape.js · IndexedDB',
-    live: 'https://graphiki.vercel.app/',
-  },
-  {
-    slug: 'fh-fuelhunt',
-    title: 'FuelHunt',
-    badges: [{ label: 'Maps', primary: true }, { label: 'Cloud' }],
-    description: 'Fuel station finder for South Africa. Search by location, filter by fuel type, get directions. Full-screen map with Google Maps-style bottom sheet.',
-    tech: 'TypeScript · Expo · Supabase · Mapbox',
-    live: 'https://fuelhunt.app/',
+    slug: 'sun-sea-o',
+    title: 'Sancio',
+    badges: [{ label: 'Legal', primary: true }, { label: 'Cloud' }],
+    description: 'Module-based agreement builder. Agreements assembled from individually authored, negotiated, and signed text modules. Progressive signing with version history.',
+    tech: 'TypeScript · React · Supabase · Tailwind',
+    live: 'https://sun-sea-o.vercel.app/',
   },
   {
     slug: 'intxt',
@@ -38,12 +38,40 @@ export const PROJECTS = [
     live: 'https://intxt.app/',
   },
   {
-    slug: 'sun-sea-o',
-    title: 'Sancio',
-    badges: [{ label: 'Legal', primary: true }, { label: 'Cloud' }],
-    description: 'Module-based agreement builder. Agreements assembled from individually authored, negotiated, and signed text modules. Progressive signing with version history.',
-    tech: 'TypeScript · React · Supabase · Tailwind',
-    live: 'https://sun-sea-o.vercel.app/',
+    slug: 'fh-fuelhunt',
+    title: 'FuelHunt',
+    badges: [{ label: 'Maps', primary: true }, { label: 'Cloud' }],
+    description: 'Fuel station finder for South Africa. Search by location, filter by fuel type, get directions. Full-screen map with Google Maps-style bottom sheet.',
+    tech: 'TypeScript · Expo · Supabase · Mapbox',
+    live: 'https://fuelhunt.app/',
+  },
+  {
+    slug: 'graphiki',
+    title: 'Graphiki',
+    badges: [{ label: 'Knowledge', primary: true }, { label: 'On-device' }],
+    description: 'Graph-based knowledge workspace. Build and explore networks of ideas, people, and concepts with visual queries. Runs entirely in the browser.',
+    tech: 'TypeScript · Cytoscape.js · IndexedDB',
+    live: 'https://graphiki.vercel.app/',
+  },
+  {
+    // Requirement: Quick Invoice joins the featured set; the card matches the
+    //   other PROJECTS entries and is built from public/projects/qi-invoice.
+    // Approach: title, live URL and "Invoicing" badge from meta.json; the
+    //   description from the README lead (fill in, check, download; nothing
+    //   leaves the device); tech from meta.json's stack, shortened the way
+    //   the other cards shorten theirs. No source link — meta.json marks the
+    //   repo private and has no repoUrl, same as knowless and graphiki.
+    //   Position is the hand-picked order on PROJECTS, above.
+    // Alternatives:
+    // - Second badge "PWA": rejected — "On-device" is the fact the page leads
+    //   with, the same badge Pixel Art uses for work that stays on the device.
+    // - Source link to the GitHub repo: rejected — the repo is private.
+    slug: 'qi-invoice',
+    title: 'Quick Invoice',
+    badges: [{ label: 'Invoicing', primary: true }, { label: 'On-device' }],
+    description: 'Fill in an invoice, check it over, and download it as a PDF. Works offline with no account — nothing you type leaves your device.',
+    tech: 'TypeScript · React · Vite · pdf-lib · PWA',
+    live: 'https://qi-invoice.vercel.app/',
   },
   {
     slug: 'kl-website',
@@ -62,12 +90,23 @@ export const PROJECTS = [
     live: 'https://web-arch.vercel.app/',
   },
   {
-    slug: 'dm-website',
-    title: 'devmade',
-    badges: [{ label: 'Brand', primary: true }, { label: 'Cloud' }],
-    description: 'The devmade studio front-door site. Introduces the studio and its two product lines, with case studies and a build log, and routes visitors to the right product.',
-    tech: 'TypeScript · React · Cloudflare',
-    live: 'https://www.devmade.app/',
+    // Requirement: Fanfare Chess joins the featured set.
+    // Approach: card built from public/projects/fc-fanfare-chess. Title and
+    //   Game badge from meta.json; description from the README lead; tech
+    //   shortened the way the other cards shorten theirs. No source link —
+    //   the repo is private. Second badge is PWA, same as Borderline: friends
+    //   use the server, and the app is installable with offline practice.
+    //   Position is the hand-picked order on PROJECTS, above.
+    // Alternatives:
+    // - Second badge "On-device": rejected — the shared game does not stay
+    //   on the device. Practice does, but that is not the product's lead.
+    // - Source link: rejected — the repo is private.
+    slug: 'fc-fanfare-chess',
+    title: 'Fanfare Chess',
+    badges: [{ label: 'Game', primary: true }, { label: 'PWA' }],
+    description: 'Two-player chess with a secret setup. Each player arranges their bishops and knights in private, both setups are revealed at once, then it\'s standard chess. Share a link — no accounts.',
+    tech: 'JavaScript · React · chess.js · Supabase · PWA',
+    live: 'https://fc-fanfare-chess.vercel.app/',
   },
   {
     slug: 'bl-borderline',
@@ -86,41 +125,11 @@ export const PROJECTS = [
     live: 'https://px-pixelart.vercel.app/',
   },
   {
-    // Requirement: Quick Invoice joins the featured set; the card matches the
-    //   other PROJECTS entries and is built from public/projects/qi-invoice.
-    // Approach: title, live URL and "Invoicing" badge from meta.json; the
-    //   description from the README lead (fill in, check, download; nothing
-    //   leaves the device); tech from meta.json's stack, shortened the way
-    //   the other cards shorten theirs. No source link — meta.json marks the
-    //   repo private and has no repoUrl, same as knowless and graphiki.
-    //   Appended, so the existing card order is unchanged.
-    // Alternatives:
-    // - Second badge "PWA": rejected — "On-device" is the fact the page leads
-    //   with, the same badge Pixel Art uses for work that stays on the device.
-    // - Source link to the GitHub repo: rejected — the repo is private.
-    slug: 'qi-invoice',
-    title: 'Quick Invoice',
-    badges: [{ label: 'Invoicing', primary: true }, { label: 'On-device' }],
-    description: 'Fill in an invoice, check it over, and download it as a PDF. Works offline with no account — nothing you type leaves your device.',
-    tech: 'TypeScript · React · Vite · pdf-lib · PWA',
-    live: 'https://qi-invoice.vercel.app/',
-  },
-  {
-    // Requirement: Fanfare Chess joins the featured set at the end of the list.
-    // Approach: card built from public/projects/fc-fanfare-chess. Title and
-    //   Game badge from meta.json; description from the README lead; tech
-    //   shortened the way the other cards shorten theirs. No source link —
-    //   the repo is private. Second badge is PWA, same as Borderline: friends
-    //   use the server, and the app is installable with offline practice.
-    // Alternatives:
-    // - Second badge "On-device": rejected — the shared game does not stay
-    //   on the device. Practice does, but that is not the product's lead.
-    // - Source link: rejected — the repo is private.
-    slug: 'fc-fanfare-chess',
-    title: 'Fanfare Chess',
-    badges: [{ label: 'Game', primary: true }, { label: 'PWA' }],
-    description: 'Two-player chess with a secret setup. Each player arranges their bishops and knights in private, both setups are revealed at once, then it\'s standard chess. Share a link — no accounts.',
-    tech: 'JavaScript · React · chess.js · Supabase · PWA',
-    live: 'https://fc-fanfare-chess.vercel.app/',
+    slug: 'dm-website',
+    title: 'devmade',
+    badges: [{ label: 'Brand', primary: true }, { label: 'Cloud' }],
+    description: 'The devmade studio front-door site. Introduces the studio and its two product lines, with case studies and a build log, and routes visitors to the right product.',
+    tech: 'TypeScript · React · Cloudflare',
+    live: 'https://www.devmade.app/',
   },
 ];
