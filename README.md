@@ -6,43 +6,28 @@ Portfolio and resource hub for devmade-ai projects. Deployed via Vercel.
 
 ## What It Is
 
-A React + Vite static site (build-time SSG, no server) that serves three purposes:
+A React + Vite static site (build-time SSG, no server) that serves two purposes:
 
 1. **Project portfolio** — Showcases user-facing applications with live links and source code
-2. **Internal tools directory** — Lists infrastructure and supporting repositories
-3. **Pattern library** — Reusable engineering patterns extracted from real projects (PWA, dark mode, burger menu, etc.)
+2. **Pattern library** — Reusable engineering patterns extracted from real projects (PWA, dark mode, burger menu, etc.)
 
 Also hosts `CLAUDE.md` — a comprehensive AI assistant ruleset used as a reference across all devmade-ai projects — and serves as the fleet's **reference implementation of the patterns' React variants** (BurgerMenu + focus hooks, PWA module singleton + hooks, ToastProvider, Theme Approach A).
 
 ## Projects Featured
 
-### User-Facing
-
 | Project | Description | Stack |
 |---------|-------------|-------|
 | [Farlume](https://budgy-ting.vercel.app/) | Household cashflow tracker | JS, Vue 3, Vite, IndexedDB |
-| [canva-grid](https://canva-grid.vercel.app/) | Visual design tool | JS, Vite, Tailwind |
 | [graphiki](https://graphiki.vercel.app/) | Graph-based knowledge workspace | TS, Cytoscape.js |
-| [model-pear](https://model-pear-web.vercel.app/) | B2B software pricing tool | TS, React, Vite |
-| [see-veo](https://see-veo.vercel.app/) | Personal CV/resume as PWA | TS, React, Tailwind |
 | [FuelHunt](https://fuelhunt.app) | Fuel station finder (SA) | TS, Expo, Supabase, Mapbox |
 | [inTXT](https://intxt.app) | Anonymous intention-tagged messaging | TS, Expo, Supabase |
 | [Sancio](https://sun-sea-o.vercel.app) | Module-based agreement builder | TS, React, Supabase |
-| [four-ems](https://four-ems.vercel.app/) | Self-hosted form builder | TS, React, Supabase |
 | [knowless](https://knowless.net) | Investigative journalism reader | TS, React, PWA |
 | [redline](https://web-arch.vercel.app) | Archived-page diff viewer (knowless) | JS, React, Wayback |
 | [devmade](https://www.devmade.app) | devmade studio front-door | TS, React, Cloudflare |
 | [Borderline](https://bl-borderline.vercel.app/) | Countries-of-the-world "name them all" game, alone or against a friend | JS, React, Vite, Supabase, PWA |
 | [Pixel Art](https://px-pixelart.vercel.app/) | Very basic pixel-picture maker | JS, React, Vite, PWA |
-
-### Internal Tools
-
-| Project | Description |
-|---------|-------------|
-| [repo-tor](https://repo-tor.vercel.app/) | Git analytics dashboard |
-| [tool-till-tees](https://github.com/devmade-ai/tool-till-tees) | Utilities API (contact forms, form builder, agreements) |
-| [gp-props](https://gp-props.vercel.app/) | This site — portfolio, patterns, and CLAUDE.md reference |
-| [canva-grid-assets](https://github.com/devmade-ai/canva-grid-assets) | CDN assets for canva-grid |
+| [Quick Invoice](https://qi-invoice.vercel.app/) | Fill in an invoice and download it as a PDF. Nothing leaves the device | TS, React, Vite, pdf-lib, PWA |
 
 ## Engineering Patterns
 

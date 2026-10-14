@@ -1,11 +1,17 @@
-// Landing page — hero, project cards, tool cards, pattern cards.
+// Landing page — hero, project cards, pattern cards.
+// Requirement: the featured set has no internal tools, so this page must not
+//   keep an empty "Internal Tools" section or a card component nothing renders.
+// Approach: ToolCard and the #tools section are removed with the TOOLS data.
+// Alternatives:
+// - Render the section only when TOOLS is non-empty: rejected — the list is
+//   gone, and the conditional would leave a dead nav target and unused card.
 // Requirement: the SSG pass renders this with the pattern manifest passed as a
 //   prop (crawlers need real links without running JS); the client render
 //   fetches the manifest and replaces the grid. `prerender` also disables the
 //   scroll-in animation classes: without JS nothing would ever lift
 //   scroll-animate's opacity:0, so the static output must not carry it.
 import { useEffect, useRef, useState } from 'react';
-import { HERO, PROJECTS, TOOLS } from '../data/homeContent.js';
+import { HERO, PROJECTS } from '../data/homeContent.js';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -99,41 +105,6 @@ function ProjectCard({ project, animate, active, shown, onToggle, delay }) {
               <a href={project.source} target="_blank" rel="noopener" className="btn btn-sm btn-outline rounded-full">Source</a>
             )}
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ToolCard({ tool, animate, active, shown, onToggle, delay }) {
-  const id = tool.slug || tool.title;
-  return (
-    <div
-      className={cardClass(animate, active, shown)}
-      data-delay={animate ? delay : undefined}
-      data-card-id={id}
-      data-reveal-id={animate ? `tool-${id}` : undefined}
-      onClick={(e) => onToggle(id, e)}
-    >
-      <div className="card-body py-4">
-        <h3 className="font-semibold text-base mb-1">
-          {tool.title}{' '}
-          <span className="badge badge-ghost badge-sm">{tool.badge}</span>
-        </h3>
-        <p className="text-sm text-base-content/70">{tool.description}</p>
-        <div className="card-links">
-          {tool.claudeMd && (
-            <a href={`${BASE}CLAUDE.md`} className="btn btn-sm btn-primary rounded-full">CLAUDE.md</a>
-          )}
-          {tool.slug && (
-            <a href={`${BASE}projects/${tool.slug}/`} className="btn btn-sm btn-primary rounded-full">Details</a>
-          )}
-          {tool.live && (
-            <a href={tool.live.href} target="_blank" rel="noopener" className="btn btn-sm btn-outline rounded-full">{tool.live.label}</a>
-          )}
-          {tool.source && (
-            <a href={tool.source} target="_blank" rel="noopener" className="btn btn-sm btn-outline rounded-full">Source</a>
-          )}
         </div>
       </div>
     </div>
@@ -234,26 +205,6 @@ export function HomePage({ patterns: initialPatterns = null, prerender = false }
               shown={revealed.has(`project-${project.slug}`)}
               onToggle={toggleActive}
               delay={String((i % 3) + 1)}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section id="tools" className="mb-12">
-        <h2 className={headingClass('text-2xl font-bold mb-2', 'tools-h')} data-reveal-id={animate ? 'tools-h' : undefined}>Internal Tools</h2>
-        <p className={headingClass('text-base-content/60 mb-6 max-w-xl', 'tools-p')} data-reveal-id={animate ? 'tools-p' : undefined}>
-          Infrastructure, analytics, and supporting repositories.
-        </p>
-        <div className="space-y-3">
-          {TOOLS.map((tool, i) => (
-            <ToolCard
-              key={tool.title}
-              tool={tool}
-              animate={animate}
-              active={activeId === (tool.slug || tool.title)}
-              shown={revealed.has(`tool-${tool.slug || tool.title}`)}
-              onToggle={toggleActive}
-              delay={String((i % 4) + 1)}
             />
           ))}
         </div>
