@@ -7,9 +7,9 @@
 
 export const HERO = {
   title: 'Software projects & engineering patterns',
-  // No single stack: Farlume is Vue and JavaScript, and other featured apps
-  // are Expo or React. Naming React and TypeScript here described one of them.
-  subtitle: 'User-facing apps and reusable implementation patterns. Stacks include React, Vue, and Expo.',
+  // Farlume (Vue) is not featured while it is in development, so it has no
+  // detail page. What remains is React and Expo.
+  subtitle: 'User-facing apps and reusable implementation patterns. Stacks include React and Expo.',
 };
 
 export const PROJECTS = [
@@ -44,15 +44,6 @@ export const PROJECTS = [
     description: 'Module-based agreement builder. Agreements assembled from individually authored, negotiated, and signed text modules. Progressive signing with version history.',
     tech: 'TypeScript · React · Supabase · Tailwind',
     live: 'https://sun-sea-o.vercel.app/',
-  },
-  {
-    slug: 'fl-farlume',
-    title: 'Farlume',
-    badges: [{ label: 'Finance', primary: true }, { label: 'On-device' }],
-    description: 'Household cashflow tracker. Import bank statements, detect recurring patterns, forecast spending with statistical models. All data stays on-device.',
-    tech: 'JavaScript · Vue 3 · Vite · IndexedDB',
-    live: 'https://budgy-ting.vercel.app/',
-    source: 'https://github.com/devmade-ai/fl-farlume',
   },
   {
     slug: 'kl-website',
@@ -105,7 +96,7 @@ export const PROJECTS = [
     //   Appended, so the existing card order is unchanged.
     // Alternatives:
     // - Second badge "PWA": rejected — "On-device" is the fact the page leads
-    //   with, and Farlume uses that badge for the same reason.
+    //   with, the same badge Pixel Art uses for work that stays on the device.
     // - Source link to the GitHub repo: rejected — the repo is private.
     slug: 'qi-invoice',
     title: 'Quick Invoice',

@@ -9,29 +9,20 @@ How to maintain the mirrored project docs on the gp-props portfolio site.
 > **2026-08-03 correction.** Three projects — `kl-website`, `web-arch`, `dm-website` — had their docs mirrored into `public/projects/` without ever being added to this table, and the "Last mirrored" date sat at 2026-03-31, months before two of them existed. The mirror step was run; the step that *records* it was not. When mirroring a project, both halves are the job — see the process section below.
 
 
-The homepage cards in `src/data/homeContent.js` and the README "Projects Featured" table are a hand-picked subset of the `public/projects/` mirrors. A row in this table does not mean the project is featured, and not every project is added to that set.
+Only featured projects have a page. `public/projects/<slug>/` is that page: it is prerendered and listed in the sitemap. The homepage card in `src/data/homeContent.js` and the README "Projects Featured" row are the same set. A project that is not featured does not get a directory here.
 
 | Project | Repo | README | User Guide | Testing Guide | Tutorial | Notes |
 |---------|------|--------|------------|---------------|----------|-------|
-| fl-farlume | public | Yes | Yes | Yes | Yes | All docs complete |
-| canva-grid | public | Yes | Yes | Yes | Yes | All docs complete |
 | graphiki | private | Scrubbed | Yes | Yes | Yes | README: removed git clone URL, Getting Started, dev commands, project structure, configuration, internal doc links. |
-| model-pear | public | Yes | **No** | **No** | **No** | Missing user guide, testing guide, tutorial |
-| see-veo | public | Yes | **No** | **No** | **No** | Missing user guide, testing guide, tutorial |
 | fh-fuelhunt | private | Scrubbed | Yes | Scrubbed | Yes | README: removed env vars, local URLs, project structure. Testing guide: removed SQL queries, database setup. |
 | intxt | private | Scrubbed | Yes | Yes | Yes | README: removed database schema, local URLs, setup commands, RLS details. |
 | sun-sea-o | private | Scrubbed | Yes | Yes | **No** | README: removed env vars, localhost, setup commands, project structure, internal doc refs. No TutorialModal in source. |
-| four-ems | private | Scrubbed | Yes | Yes | **No** | README: removed env vars, setup commands. User Guide and Testing Guide copied as-is. No TutorialModal in source. |
 | qi-invoice | private | Scrubbed | Yes | Scrubbed | **No** | README: removed setup commands, env vars, internal doc links; kept the design-decision notes, which are the interesting part at portfolio altitude. User Guide copied as-is (grepped first — it contains no commands, paths or env vars). Testing Guide: removed the automated-suite section, npm scripts and file paths, keeping the 16 manual scenarios. No TutorialModal in source. |
 | kl-website | private | Scrubbed | **No** | **No** | **No** | Mirrored without being recorded here — added 2026-08-03. Only a README is present; user guide, testing guide and tutorial were never mirrored. |
 | web-arch | private | Scrubbed | Yes | Yes | **No** | Branded "redline", a knowless sub-brand. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
 | bl-borderline | private | Scrubbed | Scrubbed | Scrubbed | Yes | Added 2026-09-23; re-mirrored 2026-10-01 for everything since: Play a friend, Just name them, marked results, Google Analytics and the Borderline design system (`meta.json` description, tech, use cases and dataPrivacy, the home card and the README row updated to match; the card's "On-device" badge became "PWA", since games with friends use the server). README: removed Getting started (commands, generator scripts), the internal TODO and data-doc links, the private tool-till-tees repo link and version numbers. User Guide: removed one internal TODO link, otherwise as-is. Testing Guide: removed local setup, server and rebuild commands, local URLs, the automated-checks section, the alpha debug-pill scenario, the two build-and-verify checklist items, and backend internals (table, file and function names, request payloads, library names). Tutorial from `src/components/TutorialModal.jsx`. |
 | px-pixelart | private | Scrubbed | Yes | Scrubbed | Yes | Added 2026-09-25; re-mirrored 2026-09-26 twice: inserting rows and columns, black blank squares in dark mode, preset sizes and empty custom-size boxes; then the one-screen editor (colour controls above the grid, Paint / Pick and Insert / Delete below it); re-mirrored 2026-09-27 for Google Analytics (README stack line, testing scenarios 1 and 18; `meta.json` dataPrivacy updated to match). README: removed Getting started (commands). User Guide copied as-is (no commands, paths or env vars). Testing Guide: removed local setup, server commands, the storage-filling console snippet, local URLs, rebuild steps and the automated-checks section. Tutorial from `src/components/TutorialModal.jsx`. |
 | dm-website | private | Scrubbed | Yes | Yes | **No** | The devmade studio front-door site. Mirrored without being recorded here — added 2026-08-03. No TutorialModal in source. |
-| repo-tor | public | Yes | Yes | Yes | No | No tutorial (dashboard tool) |
-| tool-till-tees | private | Scrubbed | Scrubbed | Yes | No | README: removed env vars, deployment details, SMTP config. User guide: removed env var table, service role references. |
-| gp-props | public | N/A | N/A | N/A | N/A | This repo — not a mirrored project. |
-| canva-grid-assets | public | Yes | **No** | **No** | **No** | Supporting repo — minimal docs expected. |
 
 ### Status Key
 
@@ -52,7 +43,7 @@ for r in sorted(json.load(sys.stdin), key=lambda x: x['name']):
     print(f'  {r[\"name\"]:25s} private={r[\"private\"]}')"
 ```
 
-Compare against `public/projects/` to find any missing projects.
+Compare against `public/projects/` only to see which featured projects already have a page. A repo with no directory is not missing — only featured projects get one.
 
 ## Updating an Existing Project's Docs
 
@@ -105,6 +96,8 @@ Update the status table above and the "Last mirrored" date.
 ```
 
 ## Adding a New Project
+
+Do this only when the project is joining the featured set. The directory, the homepage card, and the README row are one change. Anything else stays off the site.
 
 ### 1. Create project directory and meta.json
 
@@ -190,7 +183,7 @@ In-app walkthrough shown on first visit. Access anytime via the menu.
 
 Cards are objects in the `PROJECTS` array in `src/data/homeContent.js`. `index.html` is the landing-page shell and does not contain them.
 
-Add an entry only when this project is joining the featured set described under Current Status. A new mirror does not get a card.
+Add the directory, the card, and the README row together, and only when the project is joining the featured set. A project that is not featured does not get a page.
 
 ```js
 {
@@ -228,10 +221,10 @@ All URLs must end with a trailing slash (`/`).
 
 | Category | Description | Where on site |
 |----------|-------------|---------------|
-| user-facing | End-user applications | Detail page. Homepage card and README row only when hand-picked into the featured set. |
-| internal | Infrastructure, tools, supporting repos | Detail page. Homepage card and README row only when hand-picked into the featured set. |
+| user-facing | End-user applications | A detail page, a homepage card, and a README row, together, and only when featured. |
+| internal | Infrastructure, tools, supporting repos | No page. |
 | discontinued | No longer maintained | Not listed (plant-fur, coin-zapp) |
 
 ## Private Repos
 
-Currently private: graphiki, fh-fuelhunt, intxt, tool-till-tees, sun-sea-o, four-ems, qi-invoice, bl-borderline, px-pixelart, kl-website, web-arch, dm-website
+Currently private: graphiki, fh-fuelhunt, intxt, sun-sea-o, qi-invoice, bl-borderline, px-pixelart, kl-website, web-arch, dm-website

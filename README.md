@@ -8,7 +8,7 @@ Portfolio and resource hub for devmade-ai projects. Deployed via Vercel.
 
 A React + Vite static site (build-time SSG, no server) that serves two purposes:
 
-1. **Project portfolio** — Showcases user-facing applications with live links. A source link is included when the repo is public.
+1. **Project portfolio** — Showcases user-facing applications with live links.
 2. **Pattern library** — Reusable engineering patterns extracted from real projects (PWA, dark mode, burger menu, etc.)
 
 Also hosts `CLAUDE.md` — a comprehensive AI assistant ruleset used as a reference across all devmade-ai projects — and serves as the fleet's **reference implementation of the patterns' React variants** (BurgerMenu + focus hooks, PWA module singleton + hooks, ToastProvider, Theme Approach A).
@@ -17,7 +17,6 @@ Also hosts `CLAUDE.md` — a comprehensive AI assistant ruleset used as a refere
 
 | Project | Description | Stack |
 |---------|-------------|-------|
-| [Farlume](https://budgy-ting.vercel.app/) | Household cashflow tracker | JS, Vue 3, Vite, IndexedDB |
 | [graphiki](https://graphiki.vercel.app/) | Graph-based knowledge workspace | TS, Cytoscape.js |
 | [FuelHunt](https://fuelhunt.app) | Fuel station finder (SA) | TS, Expo, Supabase, Mapbox |
 | [inTXT](https://intxt.app) | Anonymous intention-tagged messaging | TS, Expo, Supabase |
@@ -163,12 +162,13 @@ the `?name=` pages get their structured data at runtime. It is the check that
 catches a second JSON-LD block being appended instead of the existing one being
 rewritten — a change that leaves `dist/` untouched and `verify:seo` green.
 
-Every pattern and every project is **prerendered to its own file** at
+Every pattern, and every featured project, is **prerendered to its own file** at
 `patterns/<slug>/` and `projects/<slug>/` — real content and its own title,
 description and canonical in the markup, so each crawls without JS and unfurls
-as itself rather than as "Pattern Details" / "Project Details". The legacy
-`pattern.html?name=` / `project.html?name=` forms still work and canonicalise
-to the clean URLs.
+as itself rather than as "Pattern Details" / "Project Details". A project that
+is not featured has no directory under `public/projects/`, so it is not
+prerendered and not in the sitemap. The legacy `pattern.html?name=` /
+`project.html?name=` forms still work and canonicalise to the clean URLs.
 
 `sitemap.xml` is **generated at build** from `docs/implementations/` and
 `public/projects/` — do not add one to `public/`, it would shadow the real file.

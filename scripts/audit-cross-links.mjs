@@ -186,7 +186,10 @@ if (process.argv.includes('--self-test')) {
     [!!hit, `extracts the URL from shipped markup (${hit ?? 'NOTHING FOUND'})`],
     [target?.kind === 'legacy-pages', `classifies it as a legacy Pages origin (got ${target?.kind ?? 'null'})`],
     [target?.slug === 'see-veo', `attributes it to see-veo (got ${target?.slug ?? 'null'})`],
-    [canonicalBySlug.has('see-veo'), 'knows see-veo\'s current origin, so the report can name it'],
+    // see-veo is no longer a featured page, so the audit has no canonical
+    // origin to recommend. A project that still has a page must.
+    [!canonicalBySlug.has('see-veo'), 'see-veo has no detail page, so no canonical origin is invented for it'],
+    [canonicalBySlug.has('graphiki'), 'a featured project still has a canonical origin to recommend'],
   ];
   for (const [ok, why] of checks) {
     if (!ok) bad++;
