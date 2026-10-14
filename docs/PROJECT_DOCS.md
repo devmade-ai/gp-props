@@ -234,4 +234,4 @@ All URLs must end with a trailing slash (`/`).
 
 ## Private Repos
 
-Currently private: graphiki, fh-fuelhunt, intxt, tool-till-tees, sun-sea-o, four-ems, qi-invoice, bl-borderline, px-pixelart
+Currently private: graphiki, fh-fuelhunt, intxt, tool-till-tees, sun-sea-o, four-ems, qi-invoice, bl-borderline, px-pixelart, kl-website, web-arch, dm-website
