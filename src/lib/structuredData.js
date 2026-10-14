@@ -20,8 +20,11 @@ export const SITE = 'https://gp-props.vercel.app/';
 export const ORG_ID = SITE + '#org';
 export const WEBSITE_ID = SITE + '#website';
 
+// "internal tools" came out of this sentence when that homepage section was
+// removed. Every other copy (the three HTML templates, the manifest
+// description, GENERIC_PROJECT_DESC) has to stay identical with this one.
 const SITE_DESCRIPTION =
-  'Software projects, internal tools, and reusable engineering patterns by devmade-ai.';
+  'Software projects and reusable engineering patterns by devmade-ai.';
 
 /**
  * The nodes that are true on every page of the site. Static in all three

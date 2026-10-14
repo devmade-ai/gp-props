@@ -135,13 +135,6 @@ the name, or a stale deployment. The dashboard is the only way to tell; this
 note deliberately does not guess, because guessing ownership from content is
 exactly the mistake that let §1a sit unreported earlier the same day.
 
-### Notes — not defects, but they will bite later
-
-- **`fl-farlume`'s canonical origin is `budgy-ting.vercel.app`**, the pre-rename
-  name, recorded that way in `public/projects/fl-farlume/meta.json`
-  (`fl-farlume.vercel.app` 404s). Correct today. But the product is "Farlume"
-  served from a `budgy-ting` host, so if the deployment ever moves, `meta.json`
-  must move with it or both audits start reporting the wrong thing.
 ### Why no script caught this
 
 `npm run audit:discoverability` grades the origins `meta.json` names.

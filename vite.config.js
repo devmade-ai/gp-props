@@ -394,7 +394,7 @@ function generatePatternManifest() {
 //   Vite + React.
 function prerenderPages() {
   const GENERIC_PATTERN_DESC = 'Reusable engineering patterns by devmade-ai — implementation guides shared across every project.';
-  const GENERIC_PROJECT_DESC = 'Software projects, internal tools, and reusable engineering patterns by devmade-ai.';
+  const GENERIC_PROJECT_DESC = 'Software projects and reusable engineering patterns by devmade-ai.';
 
   function escapeAttr(text) {
     return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -814,7 +814,7 @@ export default defineConfig({
         // all say devmade-ai, and this string is what the install prompt shows.
         name: APP_NAME,
         short_name: APP_SHORT_NAME,
-        description: 'Software projects, internal tools, and reusable engineering patterns by devmade-ai.',
+        description: 'Software projects and reusable engineering patterns by devmade-ai.',
         id: '/',
         // Matches the coffee (--prefersdark default) base-100 — THEME_DARK_MODE
         // requires the manifest fallback to be a real theme color, and this is the

@@ -22,9 +22,9 @@ const PROJECTS_DIR = join(ROOT, 'public', 'projects');
 /**
  * Every tracked origin, as [slug, url, discoverabilityDeclaration].
  *
- * A project with no live URL is not a gap — canva-grid-assets is a CDN bucket
- * with nothing to serve. Silently skipping would hide a genuinely missing one,
- * so the caller is told on stderr.
+ * A project with no live URL is not a gap — a CDN or asset bucket has nothing
+ * to serve. Silently skipping would hide a genuinely missing one, so the
+ * caller is told on stderr.
  */
 export function origins() {
   const found = [['gp-props', SITE]];

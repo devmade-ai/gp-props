@@ -7,19 +7,12 @@
 
 export const HERO = {
   title: 'Software projects & engineering patterns',
-  subtitle: 'User-facing apps, internal tools, and reusable implementation patterns. Built with React, TypeScript, and modern web standards.',
+  // Farlume (Vue) is not featured while it is in development, so it has no
+  // detail page. What remains is React and Expo.
+  subtitle: 'User-facing apps and reusable implementation patterns. Stacks include React and Expo.',
 };
 
 export const PROJECTS = [
-  {
-    slug: 'canva-grid',
-    title: 'CanvaGrid',
-    badges: [{ label: 'Design', primary: true }, { label: 'On-device' }],
-    description: 'Visual design tool. Upload images, add text overlays, choose layouts and themes, export for social media, web, or print. Multi-page document support.',
-    tech: 'JavaScript · Vite · Tailwind',
-    live: 'https://canva-grid.vercel.app/',
-    source: 'https://github.com/devmade-ai/canva-grid',
-  },
   {
     slug: 'graphiki',
     title: 'Graphiki',
@@ -51,41 +44,6 @@ export const PROJECTS = [
     description: 'Module-based agreement builder. Agreements assembled from individually authored, negotiated, and signed text modules. Progressive signing with version history.',
     tech: 'TypeScript · React · Supabase · Tailwind',
     live: 'https://sun-sea-o.vercel.app/',
-  },
-  {
-    slug: 'four-ems',
-    title: 'Four Ems',
-    badges: [{ label: 'Forms', primary: true }, { label: 'Cloud' }],
-    description: 'Self-hosted form builder. Drag-and-drop editor, multi-page forms, conditional logic, response dashboard, CSV export, and iframe embedding.',
-    tech: 'TypeScript · React · Tailwind · Supabase',
-    live: 'https://four-ems.vercel.app/',
-  },
-  {
-    slug: 'fl-farlume',
-    title: 'Farlume',
-    badges: [{ label: 'Finance', primary: true }, { label: 'On-device' }],
-    description: 'Household cashflow tracker. Import bank statements, detect recurring patterns, forecast spending with statistical models. All data stays on-device.',
-    tech: 'JavaScript · Vue 3 · Vite · IndexedDB',
-    live: 'https://budgy-ting.vercel.app/',
-    source: 'https://github.com/devmade-ai/fl-farlume',
-  },
-  {
-    slug: 'model-pear',
-    title: 'Software Transaction Structuring Tool',
-    badges: [{ label: 'Finance', primary: true }],
-    description: 'B2B software pricing tool. Find optimal pricing where you hit your margin and the client sees ROI. Compare 6 transaction models with 47 variants.',
-    tech: 'TypeScript · SvelteKit · PWA',
-    live: 'https://model-pear-web.vercel.app/',
-    source: 'https://github.com/devmade-ai/model-pear',
-  },
-  {
-    slug: 'see-veo',
-    title: 'Personal CV / Resume',
-    badges: [{ label: 'Portfolio', primary: true }, { label: 'On-device' }],
-    description: 'Personal CV and resume as an installable web app. Skills, project showcase, activity charts, and PDF export built in.',
-    tech: 'TypeScript · React · Tailwind',
-    live: 'https://see-veo.vercel.app/',
-    source: 'https://github.com/devmade-ai/see-veo',
   },
   {
     slug: 'kl-website',
@@ -127,38 +85,42 @@ export const PROJECTS = [
     tech: 'JavaScript · React · Vite · PWA',
     live: 'https://px-pixelart.vercel.app/',
   },
-];
-
-export const TOOLS = [
   {
-    slug: 'repo-tor',
-    title: 'Git Analytics Dashboard',
-    badge: 'Analytics',
-    description: 'Git analytics dashboard. Extract commit history from any repo, visualize progress, contributors, and code health. 6 dashboard tabs with role-based views.',
-    live: { label: 'Dashboard', href: 'https://repo-tor.vercel.app/' },
-    source: 'https://github.com/devmade-ai/repo-tor',
+    // Requirement: Quick Invoice joins the featured set; the card matches the
+    //   other PROJECTS entries and is built from public/projects/qi-invoice.
+    // Approach: title, live URL and "Invoicing" badge from meta.json; the
+    //   description from the README lead (fill in, check, download; nothing
+    //   leaves the device); tech from meta.json's stack, shortened the way
+    //   the other cards shorten theirs. No source link — meta.json marks the
+    //   repo private and has no repoUrl, same as knowless and graphiki.
+    //   Appended, so the existing card order is unchanged.
+    // Alternatives:
+    // - Second badge "PWA": rejected — "On-device" is the fact the page leads
+    //   with, the same badge Pixel Art uses for work that stays on the device.
+    // - Source link to the GitHub repo: rejected — the repo is private.
+    slug: 'qi-invoice',
+    title: 'Quick Invoice',
+    badges: [{ label: 'Invoicing', primary: true }, { label: 'On-device' }],
+    description: 'Fill in an invoice, check it over, and download it as a PDF. Works offline with no account — nothing you type leaves your device.',
+    tech: 'TypeScript · React · Vite · pdf-lib · PWA',
+    live: 'https://qi-invoice.vercel.app/',
   },
   {
-    slug: 'tool-till-tees',
-    title: 'Utilities API',
-    badge: 'API',
-    description: 'Utilities API on Vercel. Contact form endpoint, multi-tenant form builder, and agreement management backend. All backed by Supabase.',
-    live: { label: 'Live', href: 'https://tool-till-tees.vercel.app/' },
-  },
-  {
-    // This site — links to CLAUDE.md rather than a detail page.
-    slug: null,
-    title: 'Project Portfolio',
-    badge: 'Config',
-    description: 'This site. Hosts shared AI assistant rules, engineering patterns, and the project portfolio. Also serves as the canonical CLAUDE.md reference.',
-    claudeMd: true,
-    source: 'https://github.com/devmade-ai/gp-props',
-  },
-  {
-    slug: 'canva-grid-assets',
-    title: 'CDN Assets for CanvaGrid',
-    badge: 'CDN',
-    description: 'CDN assets repository for canva-grid. Hosts sample images and media files served to the design tool.',
-    source: 'https://github.com/devmade-ai/canva-grid-assets',
+    // Requirement: Fanfare Chess joins the featured set at the end of the list.
+    // Approach: card built from public/projects/fc-fanfare-chess. Title and
+    //   Game badge from meta.json; description from the README lead; tech
+    //   shortened the way the other cards shorten theirs. No source link —
+    //   the repo is private. Second badge is PWA, same as Borderline: friends
+    //   use the server, and the app is installable with offline practice.
+    // Alternatives:
+    // - Second badge "On-device": rejected — the shared game does not stay
+    //   on the device. Practice does, but that is not the product's lead.
+    // - Source link: rejected — the repo is private.
+    slug: 'fc-fanfare-chess',
+    title: 'Fanfare Chess',
+    badges: [{ label: 'Game', primary: true }, { label: 'PWA' }],
+    description: 'Two-player chess with a secret setup. Each player arranges their bishops and knights in private, both setups are revealed at once, then it\'s standard chess. Share a link — no accounts.',
+    tech: 'JavaScript · React · chess.js · Supabase · PWA',
+    live: 'https://fc-fanfare-chess.vercel.app/',
   },
 ];

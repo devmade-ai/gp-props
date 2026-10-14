@@ -84,7 +84,6 @@ export function Navbar() {
 
   const items = [
     { label: 'Projects', href: `${BASE}#projects` },
-    { label: 'Tools', href: `${BASE}#tools` },
     { label: 'Patterns', href: `${BASE}#patterns` },
     // Theme block: toggle, picker, random — kept contiguous per the pattern's
     // recommended menu order.
