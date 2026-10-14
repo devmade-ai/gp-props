@@ -17,17 +17,17 @@ Also hosts `CLAUDE.md` — a comprehensive AI assistant ruleset used as a refere
 
 | Project | Description | Stack |
 |---------|-------------|-------|
-| [graphiki](https://graphiki.vercel.app/) | Graph-based knowledge workspace | TS, Cytoscape.js |
-| [FuelHunt](https://fuelhunt.app) | Fuel station finder (SA) | TS, Expo, Supabase, Mapbox |
-| [inTXT](https://intxt.app) | Anonymous intention-tagged messaging | TS, Expo, Supabase |
 | [Sancio](https://sun-sea-o.vercel.app) | Module-based agreement builder | TS, React, Supabase |
+| [inTXT](https://intxt.app) | Anonymous intention-tagged messaging | TS, Expo, Supabase |
+| [FuelHunt](https://fuelhunt.app) | Fuel station finder (SA) | TS, Expo, Supabase, Mapbox |
+| [graphiki](https://graphiki.vercel.app/) | Graph-based knowledge workspace | TS, Cytoscape.js |
+| [Quick Invoice](https://qi-invoice.vercel.app/) | Fill in an invoice and download it as a PDF. Nothing leaves the device | TS, React, Vite, pdf-lib, PWA |
 | [knowless](https://knowless.net) | Investigative journalism reader | TS, React, PWA |
 | [redline](https://web-arch.vercel.app) | Archived-page diff viewer (knowless) | JS, React, Wayback |
-| [devmade](https://www.devmade.app) | devmade studio front-door | TS, React, Cloudflare |
+| [Fanfare Chess](https://fc-fanfare-chess.vercel.app/) | Two-player chess with a secret setup | JS, React, chess.js, Supabase, PWA |
 | [Borderline](https://bl-borderline.vercel.app/) | Countries-of-the-world "name them all" game, alone or against a friend | JS, React, Vite, Supabase, PWA |
 | [Pixel Art](https://px-pixelart.vercel.app/) | Very basic pixel-picture maker | JS, React, Vite, PWA |
-| [Quick Invoice](https://qi-invoice.vercel.app/) | Fill in an invoice and download it as a PDF. Nothing leaves the device | TS, React, Vite, pdf-lib, PWA |
-| [Fanfare Chess](https://fc-fanfare-chess.vercel.app/) | Two-player chess with a secret setup | JS, React, chess.js, Supabase, PWA |
+| [devmade](https://www.devmade.app) | devmade studio front-door | TS, React, Cloudflare |
 
 ## Engineering Patterns
 
