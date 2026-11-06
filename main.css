@@ -202,6 +202,33 @@
   transition-delay: 0.12s;
 }
 
+/* Requirement: card actions (Details, Live app, Source, View pattern) are at
+   least 44×44 CSS px on a coarse pointer (WCAG 2.5.5). btn-sm is 32px and the
+   resting scale(0.95) paints that as ~30px. A fine pointer keeps that compact
+   look.
+   Approach: @media (pointer: coarse), the same split four-ems uses via
+   pointer-coarse:min-h-11 / min-w-11. min-height/min-width 2.75rem on every
+   .card-links .btn, and transform:none so the 0.95 scale cannot shrink a 44px
+   box to ~42px. Opacity still mutes resting links. One rule covers the whole
+   row, including pattern cards and Source.
+   Alternatives:
+   - pointer-coarse:min-h-11 on each anchor only: rejected — those utilities
+     are layered and cannot override this unlayered scale, and the class would
+     be copied onto every link.
+   - Enlarge every btn-sm: rejected — changes desktop and controls outside
+     these cards (shell, project pages).
+   - An invisible ::before hit slop: rejected — the request is a 44px control
+     on touch, and a slop box under scale(0.95) still misses 44. */
+@media (pointer: coarse) {
+  .card-links {
+    transform: none;
+  }
+  .card-links .btn {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+}
+
 /* ===== Markdown renderer classes =====
    Requirement: Markdown-rendered content (project.html, pattern.html) styled consistently
    Approach: marked library (src/lib/markdown.js) renders markdown to semantic HTML with a
