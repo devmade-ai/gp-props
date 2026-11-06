@@ -191,7 +191,7 @@ build image has no browser for. It runs in GitHub Actions (`.github/workflows/ci
 alongside the same build-and-verify command, so a divergence between the two
 surfaces there rather than as a surprise failed deploy.
 
-GitHub Pages is no longer used — see `docs/USER_ACTIONS.md` for turning it off.
+The app is deployed on Vercel at https://gp-props.vercel.app/.
 
 ## Analytics
 
