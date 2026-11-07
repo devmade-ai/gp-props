@@ -410,11 +410,14 @@ export function BurgerMenu({ items, id, version }) {
 
   return (
     <div className="relative no-print">
+      {/* 44×44 CSS px hit box. min-h-11/min-w-11 is that minimum; the glyph
+          stays w-5 (20px). p-2 around w-5 is 36px and misses it. */}
       <button
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10
+        className="inline-flex items-center justify-center min-h-11 min-w-11
+                   rounded-lg hover:bg-black/5 dark:hover:bg-white/10
                    transition-colors"
         aria-expanded={open}
         aria-controls={menuId}
@@ -521,7 +524,7 @@ export function BurgerMenu({ items, id, version }) {
 - **A backdrop element, not a document-level click/`mousedown` listener**: the listener carries the same iOS hazard, and it leaves the page beneath live — the first tap outside both dismisses the menu AND activates whatever it landed on (a link, a button, a form control). The backdrop swallows that tap. (Reason adopted from sun-sea-o's `src/constants/headerDropdown.ts`, 2026-10-05.)
 - **Externalized backdrop**: If the parent header uses `backdrop-filter`, render the backdrop outside the header stacking context (in the parent layout) to avoid `backdrop-blur-sm` clipping fixed children.
 - **DaisyUI `menu` classes** (if the app uses DaisyUI): `menu menu-sm` provides theme-aware hover states, padding, and focus indicators automatically.
-- **`min-h-11` (44px) touch targets**: Meets Apple HIG and Material Design minimum touch target guidelines.
+- **`min-h-11` (44px) touch targets**: Menu rows use `min-h-11`. The trigger uses `min-h-11 min-w-11` so the hit box is 44×44 CSS px while the glyph stays `w-5 h-5` (20px). `p-2` around that glyph is 36×36 and is not the target. Meets Apple HIG and Material Design minimum touch target guidelines.
 - **`max-h-[min(70dvh,32rem)] overflow-y-auto`, never `overflow-hidden`**: a menu of 44px rows outgrows a landscape phone. sun-sea-o measured its card running 43px past the bottom of a 740×360 window, with Diagnostics, Sign out and the version clipped and unreachable; gp-props' longer menu (theme picker included) ran 362px past the same window. A dropdown hangs off a sticky or fixed header, so scrolling the page never brings the lost rows back — the card has to scroll itself. The `70dvh` term is what guarantees reach; the `32rem` ceiling only keeps a short menu compact on tall screens. A legitimately long menu should drop the ceiling and cap at the room under its header instead (gp-props: `max-h-[calc(100dvh-5rem)]` under a 4rem navbar), or a desktop user scrolls a card that would have fit. Where the app publishes a measured `--app-height` (PWA_SYSTEM.md: Android standalone `dvh` can latch too tall after the update reload), cap against it instead: `max-h-[min(calc(var(--app-height)*0.7),32rem)]`. (Adopted from sun-sea-o, 2026-10-05.)
 - **`overscroll-contain`**: Stops scroll chaining only while the card actually overflows. Measured in Chromium (wheel scrolling): a capped card whose items fit, an uncapped card, and the backdrop all scroll the page behind the menu. Whether that matters is the app's call — see Key Lesson 5.
 - **`max-w-[calc(100vw-2rem)]`**: Prevents the dropdown from overflowing the viewport on narrow screens.
@@ -687,7 +690,7 @@ export function BurgerMenu({ items, theme }: BurgerMenuProps) {
     <>
       <Pressable
         onPress={toggle}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        style={styles.trigger}
         accessibilityRole="button"
         accessibilityLabel="Menu"
         accessibilityState={{ expanded: open }}
@@ -761,6 +764,14 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     marginVertical: 4,
   },
+  // 44×44 hit box. The bars glyph stays size 20. An 8px hitSlop around
+  // that glyph is 36px and misses the minimum.
+  trigger: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   item: {
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -782,7 +793,7 @@ const styles = StyleSheet.create({
 - **`e.target === e.currentTarget` on backdrop**: `stopPropagation()` on nested `Pressable` components is unreliable in React Native Web — the RN event system is separate from the DOM event system. Checking the target on the outer handler is more robust.
 - **`MENU_TOP` as a project-level constant**: React Native `Modal` renders in its own layer detached from the trigger element. There is no CSS `top-full` equivalent — the menu position must be a known value matching the app's header height. Adjust this per project.
 - **All colors from `theme` prop**: No hardcoded color values in the component. Platform shadows (`shadowColor`, `elevation`, `boxShadow`) use neutral values since shadow theming is not practical cross-platform.
-- **`minHeight: 44`**: Minimum touch target per Apple HIG and Material Design guidelines.
+- **`minWidth: 44` / `minHeight: 44` on the trigger, `minHeight: 44` on rows**: Minimum touch target per Apple HIG and Material Design guidelines. The bars glyph stays `size={20}`. An 8px `hitSlop` around that glyph is 36px and is not the target.
 - **`numberOfLines={1}`**: Prevents long labels from breaking the menu layout.
 - **`AccessibilityInfo.announceForAccessibility`**: Notifies screen readers when the menu opens, since React Native does not automatically announce modal visibility changes on all platforms.
 
@@ -804,7 +815,7 @@ Vue projects use the same patterns with framework-specific adaptations:
 6. **`stopPropagation` is unreliable in React Native Web** — nested `Pressable` event propagation doesn't always work because the RN event system is separate from the DOM. Use `e.target === e.currentTarget` on the outer backdrop handler instead.
 7. **Extract `ModalBackdrop` for React Native** — Modal + Pressable + Escape handling as a reusable component eliminates boilerplate across BurgerMenu, search modals, and filter drawers.
 8. **Close-then-act with 50-150ms delay** — close the menu before executing the action to prevent visual glitches from state changes while the menu is visible. Adjust the delay to match the actual transition duration (50ms for snappier, 150ms for animated). Clean up the timer on unmount using a ref.
-9. **44px minimum touch targets** — `min-h-11` on menu buttons meets Apple HIG and Material Design guidelines. `py-2.5` alone may not reach 44px on all font sizes.
+9. **44px minimum touch targets** — menu rows use `min-h-11`; the trigger uses `min-h-11 min-w-11` (React) or `minWidth`/`minHeight` 44 (React Native). The glyph stays 20px. `p-2` around a 20px icon, or an 8px `hitSlop` on it, is 36px. `py-2.5` alone may not reach 44px on all font sizes.
 10. **Route menu errors to the debug system** — `handleItem` should use `window.__debugPushError()` when available, making menu action failures visible in the debug pill without DevTools.
 11. **Haptic feedback on toggle** — `lightTap()` from expo-haptics (with web no-op guard) provides tactile feedback on mobile. Subtle but noticeable improvement in perceived quality.
 12. **Tailwind v4 `dark:` variant requires project-level config** — v4 defaults to `prefers-color-scheme` (OS preference). For class-based dark mode toggling (`.dark` on `<html>`), the project must add `@custom-variant dark (&:where(.dark, .dark *));` to its CSS.

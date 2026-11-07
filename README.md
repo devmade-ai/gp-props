@@ -84,6 +84,7 @@ gp-props/
     verify-timer-cleanup.mjs    # Tripwire: timer/listener cleanup rules
     verify-seo.mjs              # Tripwire: discoverability contract (run after build)
     verify-icon-cache-bust.mjs  # Tripwire: icon versioning contract (run after build)
+    verify-pattern-guidance.mjs # Tripwire: burger trigger size and app-height read timing
   docs/
     SESSION_NOTES.md            # What the next session must know (empty by default)
     TODO.md                     # Pending items
@@ -106,6 +107,7 @@ npm run verify:seo           # Static check on the discoverability setup
 npm run verify:icons         # Icon cache-busting contract (build first)
 npm run verify:timer-cleanup # Timer/listener cleanup hygiene
 npm run verify:ssr-safety    # SSR entry never imports a browser-only singleton
+npm run verify:pattern-guidance # Burger trigger is 44px; app-height read is deferred
 npm run smoke:seo            # Loads the built pages in a browser (build first)
 ```
 

@@ -495,17 +495,28 @@ rules it does NOT take over:
 
 The rules that keep the shell alive when the virtual keyboard opens — these
 come from shipped fleet bugs, not preference (PWA_SYSTEM.md, platform
-gotchas). Two reference implementations, one per concern: graphiki's
-`appHeight.ts` for the height rules (1–3), fc-fanfare-chess's
-`src/lib/appHeight.js` for the phantom-inset rule (5) — the latter also
-carries the height rules, folded into one module:
+gotchas). graphiki's `src/utils/appHeight.ts` publishes `--app-height`
+(rules 1–3). fc-fanfare-chess's `src/lib/appHeight.js` publishes
+`--safe-bottom` (rule 5) and also publishes `--app-height`:
 
 1. **The shell ignores the keyboard.** It sizes off `--app-height`, a CSS
-   variable published from measured `window.innerHeight` (refreshed on
-   `pageshow` / `visibilitychange` / `orientationchange` with settle reads),
-   with `100dvh` only as the pre-JS fallback. The shell never tracks
-   `resize` on mobile — the Android soft keyboard fires it, and a shell that
-   follows collapses, sliding the bottom nav off-screen.
+   variable published from measured `window.innerHeight`, with `100dvh` only
+   as the pre-JS fallback. `pageshow`, `visibilitychange` (only when the
+   document is visible), and `orientationchange` arm that publish. Do not
+   read `window.innerHeight` inside the handler. On `orientationchange`,
+   `innerHeight` can still be the previous orientation; publishing that
+   value, and then ignoring the mobile `resize` that follows, leaves the
+   shell one orientation behind. Defer the read to a following frame and
+   to a bounded re-read at 150ms and 600ms, so the read runs after the
+   viewport dimensions have updated. One `requestAnimationFrame` is not
+   the final viewport on every browser — keep the later reads. Store the
+   frame id and timer ids where teardown can reach them. Cancel the
+   in-flight `requestAnimationFrame` and `clearTimeout` the settle timers
+   when a new settle starts and on teardown. Ignore a mobile
+   `resize` that was not preceded by one of those orientation or lifecycle
+   events: that event is the Android soft keyboard, and a shell that
+   follows it collapses, sliding the bottom nav off-screen. A desktop
+   `resize` has no soft keyboard and may publish immediately.
 2. **The focused overlay adapts.** The open modal or chat input listens to
    `visualViewport` resize/scroll: shrink the overlay to
    `visualViewport.height` and keep the focused field scrolled into view
@@ -623,9 +634,11 @@ not re-propose them without new facts:
    backdrop-paired layer. Both stacking bugs caught during the lock came
    from reusing a number without its meaning.
 5. **The shell and the overlay have opposite keyboard rules.** The shell
-   ignores the keyboard (measured `--app-height`, no mobile `resize`); the
-   focused overlay adapts (`visualViewport`). Every generic "just use dvh /
-   resize the viewport" prescription breaks one side or the other.
+   ignores the keyboard (measured `--app-height`; a mobile `resize` that
+   was not preceded by an orientation or lifecycle event does not change
+   it); the focused overlay adapts (`visualViewport`). Every generic
+   "just use dvh / resize the viewport" prescription breaks one side or
+   the other.
 6. **One owner for exclusivity, history, and the body lock.** Concurrency
    rules, back-button popping, and scroll locking are the same state
    machine; three independent boolean flags produce two open drawers and a
