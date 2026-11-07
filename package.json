@@ -14,11 +14,12 @@
     "verify:seo": "node scripts/verify-seo.mjs",
     "verify:icons": "node scripts/verify-icon-cache-bust.mjs",
     "verify:ssr-safety": "node scripts/verify-ssr-safety.mjs",
+    "verify:pattern-guidance": "node scripts/verify-pattern-guidance.mjs",
     "generate:og-image": "node scripts/generate-og-image.mjs",
     "smoke:seo": "node scripts/smoke-structured-data.mjs",
     "audit:discoverability": "node scripts/audit-discoverability.mjs",
     "audit:cross-links": "node scripts/audit-cross-links.mjs",
-    "verify": "npm run verify:claude-canonical && npm run verify:timer-cleanup && npm run verify:ssr-safety && npm run verify:seo && npm run verify:icons",
+    "verify": "npm run verify:claude-canonical && npm run verify:timer-cleanup && npm run verify:ssr-safety && npm run verify:seo && npm run verify:icons && npm run verify:pattern-guidance",
     "verify:claude-canonical": "node scripts/verify-claude-canonical.mjs"
   },
   "devDependencies": {
