@@ -23,7 +23,8 @@ shell; apps with a working canvas, selections, or an assistant surface do.
 **Related patterns:**
 - [Z_INDEX_SCALE.md](Z_INDEX_SCALE.md) — the shell's surfaces map onto the standard scale; the scrimless-vs-scrimmed rule lives there as Rule 6
 - [BURGER_MENU.md](BURGER_MENU.md) — where this shell is adopted, the left menu drawer supersedes the dropdown; its focus hooks are mandated here unchanged
-- [PWA_SYSTEM.md](PWA_SYSTEM.md) — `--app-height`, safe areas, and the standalone status bar rules the shell depends on
+- [PWA_SYSTEM.md](PWA_SYSTEM.md) — `--app-height`, safe areas, the standalone status bar rules, and the iPhone PWA head-meta rule
+- [reference/iphone-pwa-web-shell.css](reference/iphone-pwa-web-shell.css) — copy-paste web shell shapes for top/bottom inset ownership (not a shared package)
 - [TIMER_LEAKS.md](TIMER_LEAKS.md) — every listener the shell registers (`popstate`, `visualViewport`, drag) follows its cleanup contract
 - [DESIGN_TOKENS.md](DESIGN_TOKENS.md) — the token contract the shell's chrome is styled against; the boundary rules live in [The Design Handoff](#the-design-handoff)
 
@@ -166,13 +167,27 @@ Four boundary rules govern where that contract meets this shell:
 
 Identity plus current-view actions. **No second burger** — the menu trigger
 lives in the bottom nav (and moves into the header only when the nav folds
-into it at the desktop breakpoint). Sticky at z-20, with
-`padding-top: max(0.5rem, env(safe-area-inset-top))` — in standalone mode
-with a translucent status bar the clock sits over the first line otherwise
-(see PWA_SYSTEM.md's platform gotchas). This padding is how the
-`--header-height` token's safe-area term is *realized*, not an addition to
-it — the token already includes the inset, so nothing sizing against the
-header adds it again.
+into it at the desktop breakpoint). On the web, the header chrome is
+**sticky (or fixed) at `top: 0`, z-20, full width, and opaque** — Safari 26
+tints the Home Screen PWA status bar from that sample target (WebKit
+[bug 319479](https://bugs.webkit.org/show_bug.cgi?id=319479); fixed on the web
+in devmade-ai/canva-grid PR #165, devmade-ai/sun-sea-o `src/index.css`
+`.shell-header`). **Do not put
+`backdrop-filter` on the header** the status bar samples; blurred chrome
+reads as a persistent translucent band on device.
+
+**Top safe-area ownership:** `env(safe-area-inset-top)` belongs in a
+**dedicated band** (a zero-content-height sibling above the control row),
+inside the same sticky header box — not as `padding-top` on a fixed-height
+row (that squeezes controls under the notch; measured in
+devmade-ai/kl-website `Chrome.tsx` `Masthead`) and not only as a spacer in
+normal document flow below banners (that fails the sticky sample and was why
+several fleet PWAs stayed blurred until the header wrapper moved). When
+update/offline banners render above the header, an additional top spacer
+*above* those banners is correct (devmade-ai/sun-sea-o `AppLayout.tsx` —
+status-bar inset above the first painted chrome). The `--header-height`
+token still includes the inset; realize it once via the band, never stack
+band + row padding + token on the same edge.
 
 Header action dropdowns are z-50 (the menu layer). **An overlay drawer and a
 header dropdown are never open together** — they share z-50, and the shell
@@ -182,7 +197,16 @@ so dropdowns work normally while it is open.
 ### Bottom nav
 
 Primary destinations plus the **menu button**, which opens the left drawer.
-Fixed at z-20 with `padding-bottom: var(--safe-bottom)`. At the
+Fixed at z-20. **Bottom inset ownership:** `padding-bottom: var(--safe-bottom)`
+on the **fixed nav container**, with an **inner row exactly `--nav-height`**
+— the home-indicator strip is inside the opaque bar, not a page-colored gap
+(devmade-ai/sun-sea-o `src/index.css` `.shell-nav-bottom` / `.shell-nav-bar`;
+devmade-ai/kl-website `BottomNav` mirrors the same split with
+`env(safe-area-inset-bottom)` under the tab row). The canvas reserves
+`var(--nav-height) + var(--safe-bottom)` in its bottom padding so content
+does not sit under the bar. Viewport-fixed layers that span edge-to-edge
+also carry `env(safe-area-inset-left/right)` at the shell boundary
+(`kl-website` `shellInsets.ts` `FIXED_SHELL_HORIZONTAL`). At the
 desktop breakpoint the nav folds into the header — no bottom nav at 768px and
 up, unless the short-viewport clause applies.
 
@@ -490,6 +514,74 @@ rules it does NOT take over:
   dialog is inert, including a toast promoted above it: visible, but not
   clickable and absent from the accessibility tree (PWA_SYSTEM.md, Toast
   System). An error from an action in the modal is rendered in the modal.
+
+## iPhone Home Screen PWA (web)
+
+Fleet work November 2026 — confirmed on a real iPhone. This section is **web
+app shell only** (Vite/React or equivalent). It does not introduce a shared
+runtime package: copy the shapes in
+[reference/iphone-pwa-web-shell.css](reference/iphone-pwa-web-shell.css) or
+read the reference repos below.
+
+### Do not ship `apple-mobile-web-app-status-bar-style`
+
+**Omit** `<meta name="apple-mobile-web-app-status-bar-style" …>` entirely.
+Values such as `black-translucent` draw a **blurred/translucent status-bar band**
+over the header in Home Screen PWAs. Removing the meta fixed the header on
+device across the fleet (user-verified). Landed in:
+
+| Repo | Change |
+|------|--------|
+| devmade-ai/canva-grid | PR #165 (commit `915185d1`) |
+| devmade-ai/px-pixelart | PR #8 |
+| devmade-ai/fc-fanfare-chess | PR #32 |
+| devmade-ai/bl-borderline | PR #42 |
+| devmade-ai/intxt | PR #184 |
+| devmade-ai/four-ems | PR #45 |
+| devmade-ai/fh-fuelhunt | PR #98 |
+| devmade-ai/graphiki | commit `3809b4fe` |
+
+**After deploy**, users may need to **fully close and reopen** the PWA; if the
+band persists, **delete the Home Screen icon and add it again** so WebKit
+re-reads the document head.
+
+### Sticky opaque top chrome (Safari 26)
+
+Safari 26 tints the status bar from a **`position: sticky` or `position: fixed`,
+opaque, full-width** element at **`top: 0`**. A safe-area band sitting only in
+normal page flow (or padding on a scrolling block) is **not** a reliable sample
+target — several apps stayed blurred until the header wrapper was sticky and
+opaque (see Thin header above). **No `backdrop-filter` on that header.**
+
+### Inset ownership — reference repos
+
+Adapt the **full Sancio shell** geometry (header band, fixed bottom nav, canvas
+padding, `--safe-bottom` phantom rule) from these PRs when aligning an app shell:
+
+canva-grid PR #165, four-ems PR #44, graphiki PR #98, fc-fanfare-chess PR #31,
+bl-borderline PR #41, px-pixelart PR #7, fh-fuelhunt PR #97, intxt PR #183.
+
+**Structural references** (who owns which inset, not menu/chat product choices):
+
+- **Sancio** — devmade-ai/sun-sea-o: `src/layouts/AppLayout.tsx` (top spacer +
+  sticky `.shell-header`), `src/components/shell/ShellNav.tsx` (menu far left,
+  hairlines, reserved far-right chat slot), `src/index.css` shell tokens.
+- **Knowless** — devmade-ai/kl-website: `src/app/Chrome.tsx` (`Masthead` top
+  band + fixed `MASTHEAD_ROW_H`, `BottomNav` `padding-bottom` under the tab
+  row), `src/app/shellInsets.ts` (horizontal env on fixed layers).
+
+**Layout invariants this doc already locks** — still true after the iPhone fixes:
+
+- Menu button **far left** behind a hairline; destinations centred; **chat /
+  assistant slot far right only in apps that have chat** (empty reserved slot
+  otherwise).
+- Bottom-nav zone geometry unchanged from [Bottom nav](#bottom-nav).
+
+### Touch targets
+
+Header and bottom-nav controls stay at **least 44×44 CSS px on coarse pointers**
+(`pointer: coarse` and/or `min-h-[44px] min-w-[44px]` floors). See
+[Accessibility and Motion](#accessibility-and-motion).
 
 ## The Shell and the Keyboard
 
