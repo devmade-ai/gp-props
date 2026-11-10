@@ -1208,7 +1208,7 @@ export default memo(function InstallInstructionsModal({ isOpen, onClose, instruc
 
 **Standard menu/settings items** (every PWA): "Automatic updates" toggle (default ON) and "Check for updates" action, alongside the existing "Install app" item. **Single-screen apps with no menu or settings surface** put the toggle inside the update banner itself (see-veo) — it is then visible exactly when the update system is, which beats inventing a settings screen for one control.
 
-**Top-pinned banners need `env(safe-area-inset-top)`**, the mirror of the toast rule: `padding-top: max(0.625rem, env(safe-area-inset-top))`. Required in standalone mode with a `black-translucent` status bar, or the first line sits under the clock.
+**Top-pinned banners clear `env(safe-area-inset-top)`** — the mirror of the toast rule: `top: calc(<offset> + env(safe-area-inset-top, 0px))` or a dedicated spacer above the first banner (devmade-ai/sun-sea-o `AppLayout.tsx`). When the app uses the [APP_SHELL.md](APP_SHELL.md) sticky header, put the status-bar band on the shell header, not duplicated on every banner row.
 
 **Install flow:**
 - `canInstall` (Chromium) → "Install" button calls `install()` which triggers native prompt
@@ -1647,6 +1647,10 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 
 ## Platform Gotchas
 
+**Do not ship `apple-mobile-web-app-status-bar-style` on iPhone PWAs:** omit the meta entirely. `black-translucent` (and related values) produced a blurred/translucent status-bar band over the header in Home Screen PWAs — fixed fleet-wide November 2026 (user-verified on device). See the PR table in [APP_SHELL.md — iPhone Home Screen PWA (web)](APP_SHELL.md#iphone-home-screen-pwa-web). After deploy, users may need to close/reopen the PWA or remove and re-add the Home Screen icon.
+
+**Safari 26 status-bar tint needs sticky opaque top chrome (web shell):** in standalone, WebKit samples color from a `position: sticky` or `position: fixed`, **opaque**, full-width element at `top: 0` ([bug 319479](https://bugs.webkit.org/show_bug.cgi?id=319479)). A safe-area inset in normal flow alone is insufficient; the app header wrapper must be sticky/fixed and opaque, with the top inset in a dedicated band inside that wrapper — **no `backdrop-filter` on the sampled header**. Normative shell rules: [APP_SHELL.md](APP_SHELL.md) Thin header and [iPhone Home Screen PWA (web)](APP_SHELL.md#iphone-home-screen-pwa-web); snippet: [reference/iphone-pwa-web-shell.css](reference/iphone-pwa-web-shell.css). Reference implementation: devmade-ai/sun-sea-o `src/index.css` `.shell-header`, devmade-ai/canva-grid PR #165.
+
 **Safari aggressive caching:** On iOS, backgrounding a PWA doesn't truly close it — the service worker and cached state persist. Users may not see updates for days. The periodic `registration.update()` interval (see Service Worker Updates section) is critical for Safari users.
 
 **Navigation overlap prevents activation:** Even refreshing a page doesn't activate a waiting service worker because the browser keeps the old page alive until response headers arrive for the new navigation. This is why `skipWaiting()` via `postMessage` exists — without it, users would have to close *every tab* before the new SW activates. The `updateServiceWorker(true)` call handles this.
@@ -1723,7 +1727,7 @@ This applies to gp-props itself, which keeps four inline classic scripts in its 
 ### UI Patterns
 40. **Use a context-based Toast system** — `ToastProvider` + `useToast()` replaces one-off DOM-injected banners. Reusable for PWA events and general app feedback.
 41. **Use semantic theme colors for toasts** — e.g. with DaisyUI, `bg-success`/`bg-error` work across themes. Avoid hardcoding fixed colors like `bg-brand-600`.
-42. **iOS safe areas on toasts/banners** — `env(safe-area-inset-bottom)` for bottom-pinned, `env(safe-area-inset-top)` for top-pinned.
+42. **iOS safe areas on toasts/banners** — `env(safe-area-inset-bottom)` for bottom-pinned; top-pinned uses `env(safe-area-inset-top)` via offset/spacer, coordinated with APP_SHELL sticky header (do not rely on `apple-mobile-web-app-status-bar-style`).
 43. **One always-mounted live region for toasts** — unmounting it swallows the first announcement; per-toast live regions double-speak.
 43b. **A z-70 toast is invisible behind a native modal dialog** — `showModal()` is the top layer. Make the toast container a manual popover and re-promote it per toast so it paints above; it is still inert there (no clicks, not announced), so a modal's own errors go inside the modal.
 44. **Manifest `theme_color` must match the default-theme meta** — Android standalone prefers the manifest value over the meta tags.
